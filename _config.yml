@@ -1,0 +1,25 @@
+# Dependencies
+markdown:         redcarpet
+highlighter:      pygments
+
+# Permalinks
+permalink:        pretty
+relative_permalinks: true
+
+title:            Daniel Luna
+tagline:          'Software engineer'
+description:      'Specialization is for insects. - Robert Heinlein'
+url:              http://dcluna.github.io
+baseurl:          /
+
+
+author:
+  name:           'Daniel Luna'
+  url:            http://dcluna.github.io
+
+paginate:         5
+
+# Custom vars
+
+github:
+  repo:           https://www.github.com/dcluna
