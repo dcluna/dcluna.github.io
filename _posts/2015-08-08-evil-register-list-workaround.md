@@ -3,7 +3,7 @@ layout: post
 title: Fix for :reg error in Evil
 ---
 
-Small post with a fix for a (somewhat) common problem. If use Emacs' registers to save window or frame configurations, you probably found a small bug with the ':reg' command in Evil-mode.
+Small post with a fix for a (somewhat) common problem. If you use Emacs' registers to save window or frame configurations, you probably found a small bug with the ':reg' command in Evil-mode.
 
 ![Backtrace with 'wrong-type-argument number-or-marker-p _' error]({{ site.url }}/public/evil-backtrace.jpeg)
 
