@@ -26,7 +26,7 @@ And the '|' represents where the cursor is in the file. How would you set the cu
 * af<b>t</b>er the 't' in my_thing?
 ![following the letter 't' - small demo]({{ site.url }}/public/vim-primer-Tt.gif)
 * at the beginning or end of the line? at the first non-whitespace character of the line?
-![line movement demo]({{ site.url }}/public/vim-primer-line-movements.gif)
+![line movement demo]({{ site.url }}/public/vim-primer-edition-example.gif)
 
 Answers: respectively, pressing 'fs', 'Tt', '0', '$', '^' (without quotes).
 
@@ -37,7 +37,7 @@ What about plain old typing? How do I write, delete, change and move text around
 * want to <b>i</b>nsert text before the cursor? or maybe <b>a</b>ppend to the character following the cursor? Or even better, <b>I</b>nsert at the beginning or <b>A</b>ppend at the end of the current line?
 ![insert / append demo]({{ site.url }}/public/vim-primer-insert-append-example.gif)
 * <b>d</b>elete or <b>c</b>hange text in the current line? <b>s</b>ubstitute a few characters, e<b>x</b>tract or <b>r</b>eplace them?
-![multiple insert / append demo]({{ site.url }}/public/vim-primer-insert-beg-append-end-example.gif)
+![multiple insert / append demo]({{ site.url }}/public/vim-primer-edition-example.gif)
 
 (Go ahead, try playing with the letters in bold while in vi normal mode, and you'll see what I mean)
 
@@ -58,7 +58,7 @@ Want to perform somewhat complex text operations? Keyboard macros to the rescue!
 </div>
 ```
 
-And you want to add a URL to every occurrence of the word 'here'. Make a keyboard macro by pressing, say, 'qq', then type the commands: '/here<Enter>i<a href="http://my.important.link.com"><Esc>lea</a><Esc>'. After that, press '@q' to replay your recently-saved macro. The result will be:
+And you want to add a URL to every occurrence of the word 'here'. Make a keyboard macro by pressing, say, 'qq', then type the commands: '/here\[Enter\]i\<a href="http://my.important.link.com"\>\[Esc\]lea\</a>\[Esc\]'. After that, press '@q' to replay your recently-saved macro. The result will be:
 
 ```html
 <div>
@@ -72,9 +72,6 @@ And you want to add a URL to every occurrence of the word 'here'. Make a keyboar
 ![HTML link addition with macros demo]({{ site.url }}/public/vim-primer-html-macro.gif)
 
 (Want to check what is saved in your registers? Press ':reg' in normal mode)
-
-Here's a fairly simple keyboard macro demonstration: insert an extra argument in some functions.
-![Insert argument in Python - demo]({{ site.url }}/public/vim-primer-keyboard-macro-example.gif)
 
 You can also "programatically" repeat a macro or command by prefixing it with a number, telling how many times you want the macro to be played. 
 
