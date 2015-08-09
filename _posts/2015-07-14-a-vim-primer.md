@@ -26,7 +26,7 @@ And the '|' represents where the cursor is in the file. How would you set the cu
 * af<b>t</b>er the 't' in my_thing?
 ![following the letter 't' - small demo]({{ site.url }}/public/vim-primer-Tt.gif)
 * at the beginning or end of the line? at the first non-whitespace character of the line?
-![line movement demo]({{ site.url }}/public/vim-primer-edition-example.gif)
+![line movement demo]({{ site.url }}/public/vim-primer-line-movements.gif)
 
 Answers: respectively, pressing 'fs', 'Tt', '0', '$', '^' (without quotes).
 
