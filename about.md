@@ -10,6 +10,6 @@ You can usually find me coding in [Emacs](https://github.com/syl20bnr/spacemacs)
 Contact
 =======
 
-* Email: dancluna at google 
+* Email: dancluna at google mail
 * Github: [dcluna](http://www.github.com/dcluna)
 * Linkedin: [dcluna](https://www.linkedin.com/in/dcluna)
