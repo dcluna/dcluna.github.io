@@ -12,7 +12,7 @@ Every developer has been through this scenario:
 
 and everything seems fine and dandy...until Jenkins warns that you broke the build because some changes you made were in a different repository that you forgot to update.
 
-I've been through that too, but fortunately with Gradle you have an easy way to avoid this. Put this in your Gradle [init script](https://docs.gradle.org/current/userguide/init_scripts.html):
+I've been through that too, but fortunately with Gradle you have an easy way to avoid this. Put this in your Gradle [init script](https://docs.gradle.org/current/userguide/init_scripts.html) (for unix-y systems, it's ~/.gradle/init.gradle):
 
 ```groovy
 allprojects {
@@ -60,5 +60,7 @@ then
     exit 1
 fi
 ```
+
+Of course, you can also use whatever command outputs a list of git directories instead of 'gradle -q path'.
 
 Feel free to update the [gist](https://gist.github.com/da9a12e16d53d267c1f6) with better code, and let me know!
