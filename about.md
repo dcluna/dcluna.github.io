@@ -7,6 +7,8 @@ Software engineer interested in programming languages, (de)compiling, and all th
 
 You can usually find me coding in [Emacs](https://github.com/syl20bnr/spacemacs) while listening to [good music](http://musicforprogramming.net/).
 
+Want a resume? [Here you go](https://www.dropbox.com/s/odaf4o969f46rrc/daniel-luna-resume.pdf?dl=0).
+
 Contact
 =======
 
