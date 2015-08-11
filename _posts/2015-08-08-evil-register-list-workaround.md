@@ -16,7 +16,7 @@ Fortunately, the solution is very simple, just apply [this patch](https://gist.g
                             (cons reg (evil-get-register reg t)))
                         '(?\" ?* ?+ ?% ?# ?/ ?: ?. ?-
                               ?1 ?2 ?3 ?4 ?5 ?6 ?7 ?8 ?9))
-                (delq nil (mapcar (lambda (reg) (and  (not (listp (cdr reg))) reg)) register-alist))
+                (delq nil (mapcar (lambda (reg) (and (number-or-marker-p (car reg)) reg)) register-alist)) nil
                 nil)
         #'(lambda (reg1 reg2) (< (car reg1) (car reg2)))))
 ```
