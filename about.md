@@ -3,15 +3,14 @@ layout: page
 title: About Me
 ---
 
-Software engineer interested in programming languages, (de)compiling, and all things Android.
+Software developer with experience in web and mobile (native Android and hybrid) projects, ad distribution technology, algorithmic trading. Learning something new every day. This is a space to share this knowledge. 
 
-You can usually find me coding in [Emacs](https://github.com/syl20bnr/spacemacs) while listening to [good music](http://musicforprogramming.net/).
-
-Want a resume? [Here you go](https://www.dropbox.com/s/odaf4o969f46rrc/daniel-luna-resume.pdf?dl=0).
+I am currently open to new projects. 
 
 Contact
 =======
 
+* Resume: [Dropbox](https://www.dropbox.com/s/odaf4o969f46rrc/daniel-luna-resume.pdf?dl=0)
 * Email: dancluna at google mail
 * Github: [dcluna](http://www.github.com/dcluna)
 * Linkedin: [dcluna](https://www.linkedin.com/in/dcluna)
