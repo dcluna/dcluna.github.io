@@ -4,7 +4,7 @@ highlighter:      pygments
 
 # Permalinks
 permalink:        pretty
-relative_permalinks: true
+relative_permalinks: false
 
 title:            Daniel Luna
 tagline:          'Software engineer'
@@ -17,8 +17,9 @@ author:
   name:           'Daniel Luna'
   url:            http://dcluna.github.io
 
-paginate:         5
+gems: [jekyll-paginate]
 
+paginate:         5
 # Custom vars
 
 github:
