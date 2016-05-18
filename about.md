@@ -14,3 +14,5 @@ Contact
 * Email: dancluna at google mail
 * Github: [dcluna](http://www.github.com/dcluna)
 * Linkedin: [dcluna](https://www.linkedin.com/in/dcluna)
+
+<a frameborder="0" data-theme="dark" data-layers="1,2,3,4" data-stack-embed="true" href="https://embed.stackshare.io/stacks/embed/c8dfe8690c6320"/>
