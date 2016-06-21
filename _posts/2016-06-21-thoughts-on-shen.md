@@ -1,3 +1,7 @@
+---
+layout: post
+title: Thoughts on Shen
+---
 # What is Shen?
 
 -   Practical version
