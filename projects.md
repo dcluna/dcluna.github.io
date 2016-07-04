@@ -25,3 +25,13 @@ Improved their ad matching algorithm ([Lucene](https://lucene.apache.org/core/)-
 
 Developed the UI of their Android app and helped integrate it with the company's in-house [text-to-speech engine](https://www.cpqd.com.br/textofala/telefonia/index.htm).
 
+# [Open source](https://github.com/dcluna) #
+
+I've made contributions of varying complexity to the following open source projects:
+
+- [Spacemacs](https://github.com/syl20bnr/spacemacs/)
+- [inf-ruby-mode](https://github.com/nonsequitur/inf-ruby/)
+- [rspec-mode](https://github.com/pezra/rspec-mode/)
+- [sass-mode](https://github.com/nex3/sass-mode)
+- [embrace.el](https://github.com/cute-jumper/embrace.el)
+- [shen-elisp](https://github.com/deech/shen-elisp)
