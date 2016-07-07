@@ -17,7 +17,7 @@ author:
   name:           'Daniel Luna'
   url:            http://dcluna.github.io
 
-gems: [jekyll-paginate, jekyll-feed]
+gems: [jekyll-paginate, jekyll-feed, jekyll-gist]
 
 paginate:         5
 # Custom vars
