@@ -1,0 +1,676 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<title>Ruby workflow tips</title>
+<meta name="author" content="(Daniel Luna)"/>
+<style type="text/css">
+.underline { text-decoration: underline; }
+</style>
+<link rel="stylesheet" href="http://cdn.jsdelivr.net/reveal.js/3.0.0/css/reveal.css"/>
+
+<link rel="stylesheet" href="http://cdn.jsdelivr.net/reveal.js/3.0.0/css/theme/night.css" id="theme"/>
+
+
+<!-- If the query includes 'print-pdf', include the PDF print sheet -->
+<script>
+    if( window.location.search.match( /print-pdf/gi ) ) {
+        var link = document.createElement( 'link' );
+        link.rel = 'stylesheet';
+        link.type = 'text/css';
+        link.href = 'http://cdn.jsdelivr.net/reveal.js/3.0.0/css/print/pdf.css';
+        document.getElementsByTagName( 'head' )[0].appendChild( link );
+    }
+</script>
+</head>
+<body>
+<div class="reveal">
+<div class="slides">
+<section id="sec-title-slide"><h1 class="title">Ruby workflow tips</h1>
+</section>
+<section>
+<section id="slide-org0495db7">
+<h2 id="org0495db7">Tracer</h2>
+<p>
+The <a href="http://ruby-doc.org/stdlib-2.0.0/libdoc/tracer/rdoc/Tracer.html">Tracer class</a> has a few methods for registering a source-level execution
+of your Ruby program.
+</p>
+
+<p>
+You can invoke it as follows:
+</p>
+
+</section>
+<section >
+<ul>
+<li><p>
+Passing the '-r tracer' option to the ruby interpreter
+</p>
+
+<div class="org-src-container">
+
+<pre  class="src src-sh"><span style="color: #da0047;">cat</span> &gt; <span style="color: #277b00;">example.rb</span> &lt;&lt;<span style="color: #00859e;">EOF</span>
+<span style="color: #ffff00; font-weight: bold;">class A</span>
+<span style="color: #ffff00; font-weight: bold;">  def square(a)</span>
+<span style="color: #ffff00; font-weight: bold;">    return a*a</span>
+<span style="color: #ffff00; font-weight: bold;">  end</span>
+<span style="color: #ffff00; font-weight: bold;">end</span>
+
+<span style="color: #ffff00; font-weight: bold;">a = A.new</span>
+<span style="color: #ffff00; font-weight: bold;">a.square(5)</span>
+<span style="color: #ffff00; font-weight: bold;">EOF</span>
+<span style="color: #d5007b;">ruby</span> <span style="color: #da0060;">-r</span> <span style="color: #9e5a00;">tracer</span> <span style="color: #277b00;">example.rb</span>
+</pre>
+</div></li>
+
+</ul>
+
+</section>
+<section >
+<ul>
+<li><p>
+Requiring it and using the 'on' class method
+</p>
+
+<div class="org-src-container">
+
+<pre  class="src src-ruby"><span style="color: #f8f6f2;">require</span> <span style="color: #f4cf86;">'tracer'</span>
+<span style="color: #ff9eb8;">Tracer</span>.<span style="color: #916100;">stdout</span> = <span style="color: #ff9eb8;">File</span>.<span style="color: #5c57df;">open</span><span style="color: #666462;">(</span><span style="color: #f4cf86;">'/tmp/tracer_output.rb_trace'</span>, <span style="color: #f4cf86;">'a'</span><span style="color: #666462;">)</span>
+<span style="color: #ff9eb8;">Tracer</span>.<span style="color: #0083cf;">on</span> <span style="color: #666462;">{</span>
+  <span style="color: #cd008e; font-weight: bold;">class</span> <span style="color: #ff9eb8;">A</span>
+    <span style="color: #2f7a00; font-weight: bold;">def</span> <span style="color: #bd1da7;">square</span><span style="color: #fade3e;">(</span><span style="color: #00800f;">a</span><span style="color: #fade3e;">)</span>
+      <span style="color: #0085a3; font-weight: bold;">return</span> <span style="color: #00800f;">a</span>*<span style="color: #00800f;">a</span>
+    <span style="color: #a735bc; font-weight: bold;">end</span>
+  <span style="color: #a735bc; font-weight: bold;">end</span>
+
+  <span style="color: #00800f;">a</span> = <span style="color: #ff9eb8;">A</span>.<span style="color: #d90067;">new</span>
+  <span style="color: #00800f;">a</span>.<span style="color: #bd1da7;">square</span><span style="color: #fade3e;">(</span><span style="color: #b88853;">5</span><span style="color: #fade3e;">)</span>
+<span style="color: #666462;">}</span>
+</pre>
+</div></li>
+
+</ul>
+
+</section>
+<section >
+<p>
+In both cases, output is as follows:
+</p>
+
+<pre class="example">
+#0:&lt;internal:lib/rubygems/custom_require&gt;:38:Kernel:&lt;: -
+#0:example.rb:3::-: class A
+#0:example.rb:3::C: class A
+#0:example.rb:4::-:   def square(a)
+#0:example.rb:7::E: end
+#0:example.rb:9::-: a = A.new
+#0:example.rb:10::-: a.square(5)
+#0:example.rb:4:A:&gt;:   def square(a)
+#0:example.rb:5:A:-:     return a*a
+#0:example.rb:6:A:&lt;:   end
+ |  |         | |  |
+ |  |         | |   ---------------------+ event
+ |  |         |  ------------------------+ class
+ |  |          --------------------------+ line
+ |   ------------------------------------+ filename
+  ---------------------------------------+ thread
+</pre>
+
+</section>
+<section >
+<p>
+Extra: yours truly wrote a Emacs minor mode so you can open the corresponding
+files more easily. <a href="https://gist.github.com/dcluna/c7b9be4e71b5ea0993cd056fa48283f5">Gist here</a>.
+</p>
+
+</section>
+</section>
+<section>
+<section id="slide-org9d5522b">
+<h2 id="org9d5522b">gc_tracer</h2>
+<p>
+<a href="https://github.com/ko1/gc_tracer">gc_tracer</a> is a gem that allows one to trace GC execution. It logs GC
+statistics information to stderr or a file (if given).
+</p>
+
+</section>
+<section id="slide-orgbb16c9f">
+<h4 id="orgbb16c9f">Usage</h4>
+<div class="org-src-container">
+
+<pre  class="src src-ruby"><span style="color: #f8f6f2;">require</span> <span style="color: #f4cf86;">'gc_tracer'</span>
+<span style="color: #998f84;"># </span><span style="color: #998f84;">If ENV['GC_TRACER_LOGFILE'] is given, then this value and pid (concatenated with '-') is used as filename.</span>
+<span style="color: #ff9eb8;">GC</span>::<span style="color: #ff9eb8;">Tracer</span>.<span style="color: #008234;">start_logging</span><span style="color: #666462;">(</span><span style="color: #d00086;">filename</span> = <span style="color: #b88853;">nil</span><span style="color: #666462;">)</span> <span style="color: #d60035; font-weight: bold;">do</span>
+  <span style="color: #998f84;"># </span><span style="color: #998f84;">do something</span>
+<span style="color: #a735bc; font-weight: bold;">end</span>
+</pre>
+</div>
+
+</section>
+<section id="slide-orgd8a8795">
+<h4 id="orgd8a8795">Collected stats</h4>
+</section>
+<section >
+<ul class="org-ul"><li><a id="org1068ba1"></a>GC.stat<br  /><p>
+Retrieves information from Ruby's <a href="https://ruby-doc.org/core-2.1.1/GC.html#method-c-stat">GC.stat</a> method.
+</p>
+
+<blockquote nil>
+<p>
+{
+ :count=&gt;2,
+ :heap_used=&gt;9,
+ :heap_length=&gt;11,
+ :heap_increment=&gt;2,
+ :heap_live_slot=&gt;6836,
+ :heap_free_slot=&gt;519,
+ :heap_final_slot=&gt;0,
+ :heap_swept_slot=&gt;818,
+ :total_allocated_object=&gt;7674,
+ :total_freed_object=&gt;838,
+ :malloc_increase=&gt;181034,
+ :malloc_limit=&gt;16777216,
+ :minor_gc_count=&gt;2,
+ :major_gc_count=&gt;0,
+ :remembered_shady_object=&gt;55,
+ :remembered_shady_object_limit=&gt;0,
+ :old_object=&gt;2422,
+ :old_object_limit=&gt;0,
+ :oldmalloc_increase=&gt;277386,
+ :oldmalloc_limit=&gt;16777216
+}
+</p>
+</blockquote>
+
+</section>
+<section ></li>
+<li><a id="org3931ef3"></a>GC.latest_gc_info<br  /><blockquote nil>
+<p>
+    {:major_by=&gt;nil,
+:gc_by=&gt;:newobj,
+:have_finalizer=&gt;true,
+:immediate_sweep=&gt;false,
+:state=&gt;:sweeping}
+</p>
+</blockquote>
+
+</section>
+<section ></li>
+<li><a id="org27ac51b"></a>getrusage<br  /><p>
+Linux's <a href="http://man7.org/linux/man-pages/man2/getrusage.2.html">getrusage</a> call, whose results are returned in the following struct:
+</p>
+
+<div class="org-src-container">
+
+<pre  class="src src-c"><span style="color: #d31329; font-weight: bold;">struct</span> <span style="color: #ff9eb8;">rusage</span> <span style="color: #666462;">{</span>
+  <span style="color: #d31329; font-weight: bold;">struct</span> <span style="color: #ff9eb8;">timeval</span> <span style="color: #0075f2;">ru_utime</span>; <span style="color: #998f84;">/* </span><span style="color: #998f84;">user CPU time used </span><span style="color: #998f84;">*/</span>
+  <span style="color: #d31329; font-weight: bold;">struct</span> <span style="color: #ff9eb8;">timeval</span> <span style="color: #9f5900;">ru_stime</span>; <span style="color: #998f84;">/* </span><span style="color: #998f84;">system CPU time used </span><span style="color: #998f84;">*/</span>
+  <span style="color: #ff9eb8;">long</span>   <span style="color: #9740c7;">ru_maxrss</span>;        <span style="color: #998f84;">/* </span><span style="color: #998f84;">maximum resident set size </span><span style="color: #998f84;">*/</span>
+  <span style="color: #ff9eb8;">long</span>   <span style="color: #007f00;">ru_ixrss</span>;         <span style="color: #998f84;">/* </span><span style="color: #998f84;">integral shared memory size </span><span style="color: #998f84;">*/</span>
+  <span style="color: #ff9eb8;">long</span>   <span style="color: #008584;">ru_idrss</span>;         <span style="color: #998f84;">/* </span><span style="color: #998f84;">integral unshared data size </span><span style="color: #998f84;">*/</span>
+  <span style="color: #ff9eb8;">long</span>   <span style="color: #d9006a;">ru_isrss</span>;         <span style="color: #998f84;">/* </span><span style="color: #998f84;">integral unshared stack size </span><span style="color: #998f84;">*/</span>
+  <span style="color: #ff9eb8;">long</span>   <span style="color: #007ee8;">ru_minflt</span>;        <span style="color: #998f84;">/* </span><span style="color: #998f84;">page reclaims (soft page faults) </span><span style="color: #998f84;">*/</span>
+  <span style="color: #ff9eb8;">long</span>   <span style="color: #0073f2;">ru_majflt</span>;        <span style="color: #998f84;">/* </span><span style="color: #998f84;">page faults (hard page faults) </span><span style="color: #998f84;">*/</span>
+  <span style="color: #ff9eb8;">long</span>   <span style="color: #d90043;">ru_nswap</span>;         <span style="color: #998f84;">/* </span><span style="color: #998f84;">swaps </span><span style="color: #998f84;">*/</span>
+  <span style="color: #ff9eb8;">long</span>   <span style="color: #008583;">ru_inblock</span>;       <span style="color: #998f84;">/* </span><span style="color: #998f84;">block input operations </span><span style="color: #998f84;">*/</span>
+  <span style="color: #ff9eb8;">long</span>   <span style="color: #107c00;">ru_oublock</span>;       <span style="color: #998f84;">/* </span><span style="color: #998f84;">block output operations </span><span style="color: #998f84;">*/</span>
+  <span style="color: #ff9eb8;">long</span>   <span style="color: #d70036;">ru_msgsnd</span>;        <span style="color: #998f84;">/* </span><span style="color: #998f84;">IPC messages sent </span><span style="color: #998f84;">*/</span>
+  <span style="color: #ff9eb8;">long</span>   <span style="color: #786b00;">ru_msgrcv</span>;        <span style="color: #998f84;">/* </span><span style="color: #998f84;">IPC messages received </span><span style="color: #998f84;">*/</span>
+  <span style="color: #ff9eb8;">long</span>   <span style="color: #008583;">ru_nsignals</span>;      <span style="color: #998f84;">/* </span><span style="color: #998f84;">signals received </span><span style="color: #998f84;">*/</span>
+  <span style="color: #ff9eb8;">long</span>   <span style="color: #008011;">ru_nvcsw</span>;         <span style="color: #998f84;">/* </span><span style="color: #998f84;">voluntary context switches </span><span style="color: #998f84;">*/</span>
+  <span style="color: #ff9eb8;">long</span>   <span style="color: #764fd7;">ru_nivcsw</span>;        <span style="color: #998f84;">/* </span><span style="color: #998f84;">involuntary context switches </span><span style="color: #998f84;">*/</span>
+<span style="color: #666462;">}</span>;
+</pre>
+</div>
+
+</section>
+<section ></li>
+<li><a id="orgf96c8a0"></a>Custom fields/events<br  /><p>
+It's also possible to include custom fields/events in the output.
+</p>
+
+<ul>
+<li><p>
+Custom fields
+</p>
+<div class="org-src-container">
+
+<pre  class="src src-ruby"><span style="color: #ff9eb8;">GC</span>::<span style="color: #ff9eb8;">Tracer</span>.<span style="color: #008234;">start_logging</span><span style="color: #666462;">(</span><span style="color: #b88853;">custom_fields:</span> <span style="color: #fade3e;">[</span><span style="color: #b88853;">:name1</span>, <span style="color: #b88853;">:name2</span>, ...<span style="color: #fade3e;">]</span><span style="color: #666462;">)</span> <span style="color: #d60035; font-weight: bold;">do</span>
+  <span style="color: #998f84;"># </span><span style="color: #998f84;">All fields are cleared by zero.</span>
+
+  <span style="color: #998f84;"># </span><span style="color: #998f84;">You can increment values of each field.</span>
+  <span style="color: #ff9eb8;">GC</span>::<span style="color: #ff9eb8;">Tracer</span>.<span style="color: #0078f1;">custom_field_increment</span><span style="color: #666462;">(</span><span style="color: #b88853;">:name1</span><span style="color: #666462;">)</span>
+  <span style="color: #998f84;"># </span><span style="color: #998f84;">It is equivalent to</span>
+  <span style="color: #998f84;">#   </span><span style="color: #998f84;">GC::Tracer.custom_field_set(:name1, GC::Tracer.custom_field_get(:name1))</span>
+
+  <span style="color: #998f84;"># </span><span style="color: #998f84;">You can also decrement values</span>
+  <span style="color: #ff9eb8;">GC</span>::<span style="color: #ff9eb8;">Tracer</span>.<span style="color: #008461;">custom_field_decrement</span><span style="color: #666462;">(</span><span style="color: #b88853;">:name1</span><span style="color: #666462;">)</span>
+
+  <span style="color: #998f84;"># </span><span style="color: #998f84;">Now, you can specify only Fixnum as field value.</span>
+  <span style="color: #ff9eb8;">GC</span>::<span style="color: #ff9eb8;">Tracer</span>.<span style="color: #277b00;">custom_field_set</span><span style="color: #666462;">(</span><span style="color: #b88853;">:name2</span>, <span style="color: #b88853;">123</span><span style="color: #666462;">)</span>
+
+  <span style="color: #998f84;"># </span><span style="color: #998f84;">You can specify an index instead of field name (faster than actual name)</span>
+  <span style="color: #ff9eb8;">GC</span>::<span style="color: #ff9eb8;">Tracer</span>.<span style="color: #0078f1;">custom_field_increment</span><span style="color: #666462;">(</span><span style="color: #b88853;">0</span><span style="color: #666462;">)</span> <span style="color: #998f84;"># </span><span style="color: #998f84;">:name1</span>
+<span style="color: #a735bc; font-weight: bold;">end</span>
+</pre>
+</div></li>
+
+</ul>
+
+</section>
+<section >
+<ul>
+<li><p>
+Custom events
+</p>
+<div class="org-src-container">
+
+<pre  class="src src-ruby"><span style="color: #ff9eb8;">GC</span>::<span style="color: #ff9eb8;">Tracer</span>.<span style="color: #008234;">start_logging</span><span style="color: #666462;">(</span><span style="color: #b88853;">events:</span> <span style="color: #f4cf86;">%i(start)</span>, <span style="color: #b88853;">gc_stat:</span> <span style="color: #b88853;">false</span><span style="color: #666462;">)</span> <span style="color: #d60035; font-weight: bold;">do</span>
+  <span style="color: #b88853;">1_000</span>.<span style="color: #007e00;">times</span><span style="color: #666462;">{</span>|<span style="color: #796b00;">i</span>|
+    <span style="color: #b88853;">1_000</span>.<span style="color: #007e00;">times</span><span style="color: #fade3e;">{</span><span style="color: #f4cf86;">''</span><span style="color: #fade3e;">}</span>
+    <span style="color: #ff9eb8;">GC</span>::<span style="color: #ff9eb8;">Tracer</span>.<span style="color: #345ee6;">custom_event_logging</span><span style="color: #fade3e;">(</span><span style="color: #f4cf86;">"custom_</span><span style="color: #ffa724;">#{</span><span style="color: #796b00;">i</span><span style="color: #ffa724;">}</span><span style="color: #f4cf86;">"</span><span style="color: #fade3e;">)</span>
+  <span style="color: #666462;">}</span>
+<span style="color: #a735bc; font-weight: bold;">end</span>
+</pre>
+</div></li>
+
+</ul></li></ul>
+</section>
+</section>
+<section>
+<section id="slide-orgadf78a8">
+<h2 id="orgadf78a8">pry</h2>
+<p>
+The famous <a href="https://github.com/pry/pry/wiki">irb replacement</a>/debugger/swiss army knife.
+</p>
+</section>
+</section>
+<section>
+<section id="slide-org9061bf4">
+<h3 id="org9061bf4">pry-rescue</h3>
+<p>
+<a href="https://github.com/ConradIrwin/pry-rescue">pry-rescue</a> is a gem that implements "break on unhandled exception" for Ruby.
+</p>
+
+<p>
+This is particularly useful with failing specs.
+</p>
+</section>
+<section id="slide-org8c4c0b5">
+<h4 id="org8c4c0b5">Usage</h4>
+<p>
+Prepend rails/rspec/respec with `rescue` and you're good to go. When an
+unhandled exception is raised, you'll see a prompt such as follows:
+</p>
+
+<div class="org-src-container">
+
+<pre  class="src src-sh">$ <span style="color: #be1ba5;">rescue</span> <span style="color: #007fe6;">rspec</span>
+<span style="color: #008594;">From:</span> <span style="color: #0082da;">/home/conrad/0/ruby/pry-rescue/examples/example_spec.rb</span> @ <span style="color: #be1ba6;">line</span> <span style="color: #b88853;">9</span> <span style="color: #4f7600;">:</span>
+
+<span style="color: #b88853;">6:</span>
+<span style="color: #b88853;">7:</span> <span style="color: #a735bc;">describe</span> <span style="color: #f4cf86;">"Float"</span> <span style="color: #d60035;">do</span>
+<span style="color: #b88853;">8:</span>   <span style="color: #da0065;">it</span> <span style="color: #f4cf86;">"should be able to add"</span> <span style="color: #d60035;">do</span>
+=&gt;  <span style="color: #b88853;">9:</span>     <span style="color: #666462;">(</span><span style="color: #b88853;">0.1</span> <span style="color: #7f4cd4;">+</span> <span style="color: #b88853;">0.2</span><span style="color: #666462;">)</span><span style="color: #517500;">.should</span> == <span style="color: #b88853;">0.3</span>
+<span style="color: #b88853;">10:</span>   <span style="color: #a735bc;">end</span>
+<span style="color: #b88853;">11:</span> <span style="color: #a735bc;">end</span>
+
+<span style="color: #007deb;">RSpec::Expectations::ExpectationNotMetError:</span> <span style="color: #cc2914;">expected:</span> <span style="color: #b88853;">0.3</span>
+<span style="color: #a338bf;">got:</span> <span style="color: #b88853;">0.30000000000000004</span> <span style="color: #666462;">(</span><span style="color: #da0064;">using</span> ==<span style="color: #666462;">)</span>
+<span style="color: #666462;">[</span><span style="color: #b88853;">1</span><span style="color: #666462;">]</span> <span style="color: #da0055;">pry</span><span style="color: #666462;">(</span><span style="color: #d5062f;">main</span><span style="color: #666462;">)</span>&gt;
+</pre>
+</div>
+
+</section>
+<section >
+<p>
+When you're finished fixing the implementation, use the `try-again` method
+to re-run the infringing file/spec.
+</p>
+</section>
+</section>
+<section>
+<section id="slide-org4486284">
+<h3 id="org4486284">pry-stack_explorer</h3>
+<p>
+<a href="https://github.com/pry/pry-stack_explorer">This gem</a> is a nice companion to pry-rescue. It allows one to inspect and
+navigate up and down in the current stack trace.
+</p>
+
+</section>
+<section id="slide-org9c5a850">
+<h4 id="org9c5a850">Commands</h4>
+</section>
+<section >
+<ul>
+<li><p>
+show-stack
+</p>
+
+<p>
+Shows the current stack frames.
+</p>
+
+<pre class="example">
+      pry(J)&gt; show-stack
+
+Showing all accessible frames in stack:
+--
+=&gt; #0 [method]  c &lt;Object#c()&gt;
+   #1 [block]   block in b &lt;Object#b()&gt;
+   #2 [method]  b &lt;Object#b()&gt;
+   #3 [method]  alphabet &lt;Object#alphabet(y)&gt;
+   #4 [class]   &lt;class:J&gt;
+   #5 [block]   block in &lt;main&gt;
+   #6 [eval]    &lt;main&gt;
+   #7 [top]     &lt;main&gt;
+</pre></li>
+
+</ul>
+
+</section>
+<section >
+<ul>
+<li><p>
+frame N
+</p>
+
+<p>
+Jumps to the N-th frame in the current stack.
+</p>
+
+<pre class="example">
+pry(J)&gt; frame 3
+
+Frame number: 3/7
+Frame type: method
+
+From: /Users/john/ruby/projects/pry-stack_explorer/examples/example.rb @ line 10 in Object#alphabet:
+
+     5:
+     6: require 'pry-stack_explorer'
+     7:
+     8: def alphabet(y)
+     9:   x = 20
+ =&gt; 10:   b
+    11: end
+    12:
+    13: def b
+    14:   x = 30
+    15:   proc {
+</pre></li>
+
+</ul>
+
+</section>
+<section >
+<p>
+Use the up/down methods to move a frame in the respective direction.
+</p>
+
+<p>
+This method, coupled w/ pry's `ls` method (shows the current bindings),
+allows one to easily inspect the state of the current stack.
+</p>
+</section>
+</section>
+<section>
+<section id="slide-orgd82e8d0">
+<h3 id="orgd82e8d0">pry-doc</h3>
+<p>
+Default pry does not include documentation for Ruby core methods. <a href="https://github.com/pry/pry-doc">This gem</a>
+fixes that.
+</p>
+
+</section>
+<section >
+
+<div id="org3639097" class="figure">
+<p><a href="show-source-preview.png"><img src="./show-source-preview.png" alt="show-source-preview.png" /></a>
+</p>
+<p><span class="figure-number">Figure 1: </span>pry-doc show source preview</p>
+</div>
+
+</section>
+<section >
+
+<div id="org4b875a0" class="figure">
+<p><a href="show-doc-preview.png"><img src="./show-doc-preview.png" alt="show-doc-preview.png" /></a>
+</p>
+<p><span class="figure-number">Figure 2: </span>pry-doc show doc preview</p>
+</div>
+
+</section>
+<section >
+<p>
+From the gem's docs:
+</p>
+
+<blockquote nil>
+<p>
+Generally speaking, you can retrieve most of the MRI documentation and
+accompanying source code. Pry Doc is also smart enough to get any
+documentation for methods and classes implemented in C.
+</p>
+</blockquote>
+</section>
+</section>
+<section>
+<section id="slide-orga14c08e">
+<h3 id="orga14c08e">.pryrc</h3>
+<p>
+Pry also has a config file in the spirit of .irbrc. It supports both a
+"global" file in your home directory (~/.pryrc) and a per-project .pryrc file.
+</p>
+
+<p>
+Almost every aspect of pry can be customized through this file. Check the
+<a href="https://github.com/pry/pry/wiki/Pry-rc">documentation</a> for more details.
+</p>
+</section>
+</section>
+<section>
+<section id="slide-org2971b2c">
+<h3 id="org2971b2c">pry-inline</h3>
+<p>
+This <a href="https://github.com/seikichi/pry-inline">plugin</a> Enables a RubyMine-ish inline variables view.
+</p>
+
+
+<div id="org66b9963" class="figure">
+<p><a href="pry-inline-screenshot.png"><img src="./pry-inline-screenshot.png" alt="pry-inline-screenshot.png" /></a>
+</p>
+<p><span class="figure-number">Figure 3: </span>pry-inline preview</p>
+</div>
+</section>
+</section>
+<section>
+<section id="slide-org384b65c">
+<h3 id="org384b65c">pry-macro</h3>
+<p>
+This <a href="https://github.com/baweaver/pry-macro">plugin</a> records command-line actions for replaying.
+</p>
+
+<p>
+Possible usage scenario:
+</p>
+
+<div class="org-src-container">
+
+<pre  class="src src-sh"><span style="color: #666462;">[</span><span style="color: #b88853;">1</span><span style="color: #666462;">]</span> <span style="color: #da0055;">pry</span><span style="color: #666462;">(</span><span style="color: #d5062f;">main</span><span style="color: #666462;">)</span>&gt; <span style="color: #6c53db;">record-macro</span>
+<span style="color: #666462;">[</span><span style="color: #b88853;">2</span><span style="color: #666462;">]</span> <span style="color: #da0055;">pry</span><span style="color: #666462;">(</span><span style="color: #d5062f;">main</span><span style="color: #666462;">)</span>&gt; <span style="color: #b88853;">1</span>
+=&gt; <span style="color: #b88853;">1</span>
+<span style="color: #666462;">[</span><span style="color: #b88853;">3</span><span style="color: #666462;">]</span> <span style="color: #da0055;">pry</span><span style="color: #666462;">(</span><span style="color: #d5062f;">main</span><span style="color: #666462;">)</span>&gt; <span style="color: #f4cf86;">'foo'</span>
+=&gt; <span style="color: #f4cf86;">"foo"</span>
+<span style="color: #666462;">[</span><span style="color: #b88853;">4</span><span style="color: #666462;">]</span> <span style="color: #da0055;">pry</span><span style="color: #666462;">(</span><span style="color: #d5062f;">main</span><span style="color: #666462;">)</span>&gt; <span style="color: #926100;">ls</span>
+<span style="color: #d3007f;">self.methods:</span> <span style="color: #d40a2d;">inspect</span>  <span style="color: #008461;">to_s</span>
+<span style="color: #007ced;">locals:</span> <span style="color: #ad30b7;">_</span>  <span style="color: #0084c1;">__</span>  <span style="color: #c80097;">_dir_</span>  <span style="color: #da0056;">_ex_</span>  <span style="color: #00811c;">_file_</span>  <span style="color: #0069ee;">_in_</span>  <span style="color: #a735bc;">_out_</span>  <span style="color: #c80096;">_pry_</span>
+
+<span style="color: #666462;">[</span><span style="color: #b88853;">5</span><span style="color: #666462;">]</span> <span style="color: #da0055;">pry</span><span style="color: #666462;">(</span><span style="color: #d5062f;">main</span><span style="color: #666462;">)</span>&gt; <span style="color: #ac31b8;">stop-macro</span>
+<span style="color: #007ee9;">Macro</span> <span style="color: #d21626;">Name:</span> <span style="color: #008233;">testing</span>
+
+<span style="color: #666462;">[</span><span style="color: #b88853;">6</span><span style="color: #666462;">]</span> <span style="color: #da0055;">pry</span><span style="color: #666462;">(</span><span style="color: #d5062f;">main</span><span style="color: #666462;">)</span>&gt; <span style="color: #008233;">testing</span>
+=&gt; <span style="color: #b88853;">1</span>
+=&gt; <span style="color: #f4cf86;">"foo"</span>
+<span style="color: #d3007f;">self.methods:</span> <span style="color: #d40a2d;">inspect</span>  <span style="color: #008461;">to_s</span>
+<span style="color: #007ced;">locals:</span> <span style="color: #ad30b7;">_</span>  <span style="color: #0084c1;">__</span>  <span style="color: #c80097;">_dir_</span>  <span style="color: #da0056;">_ex_</span>  <span style="color: #00811c;">_file_</span>  <span style="color: #0069ee;">_in_</span>  <span style="color: #a735bc;">_out_</span>  <span style="color: #c80096;">_pry_</span>
+
+<span style="color: #666462;">[</span><span style="color: #b88853;">10</span><span style="color: #666462;">]</span> <span style="color: #da0055;">pry</span><span style="color: #666462;">(</span><span style="color: #d5062f;">main</span><span style="color: #666462;">)</span>&gt; <span style="color: #0084cb;">save-macro</span> <span style="color: #008233;">testing</span>
+</pre>
+</div>
+
+</section>
+<section >
+<p>
+And the saved macro goes in your .pryrc:
+</p>
+
+<div class="org-src-container">
+
+<pre  class="src src-ruby"><span style="color: #ff9eb8;">Pry</span>::<span style="color: #ff9eb8;">Commands</span>.<span style="color: #794ed6;">block_command</span> <span style="color: #f4cf86;">'testing'</span>, <span style="color: #f4cf86;">'no description'</span> <span style="color: #d60035; font-weight: bold;">do</span>
+  <span style="color: #c80096;">_pry_</span>.<span style="color: #0072f2;">input</span> = <span style="color: #ff9eb8;">StringIO</span>.<span style="color: #d90067;">new</span><span style="color: #666462;">(</span>
+    <span style="color: #f4cf86;">&lt;&lt;-MACRO</span>.<span style="color: #6a7000;">gsub</span><span style="color: #fade3e;">(</span>/^ <span style="color: #ff9eb8;">{</span><span style="color: #b88853;">4</span>,<span style="color: #b88853;">6</span><span style="color: #ff9eb8;">}</span>/, <span style="color: #f4cf86;">''</span><span style="color: #fade3e;">)</span>
+<span style="color: #f4cf86;">      1</span>
+<span style="color: #f4cf86;">      'foo'</span>
+<span style="color: #f4cf86;">      ls</span>
+<span style="color: #f4cf86;">    MACRO</span>
+  <span style="color: #666462;">)</span>
+<span style="color: #a735bc; font-weight: bold;">end</span>
+</pre>
+</div>
+</section>
+</section>
+<section>
+<section id="slide-org3893835">
+<h3 id="org3893835">Debugger-driven development</h3>
+<p>
+There's an interesting video by Joel Turnbull <a href="https://youtu.be/4hfMUP5iTq8?t=20m7s">here</a>, in which he discusses and
+live codes using Pry as the main driver for his development session. Heavily recommended.
+</p>
+<iframe width="560" height="315" src="https://www.youtube.com/embed/4hfMUP5iTq8?t=20m7s" frameborder="0" allowfullscreen></iframe>
+</section>
+</section>
+<section>
+<section id="slide-orga39e0a1">
+<h2 id="orga39e0a1">Bundler</h2>
+<div class="outline-text-2" id="text-orga39e0a1">
+</div></section>
+</section>
+<section>
+<section id="slide-orgb41ca16">
+<h3 id="orgb41ca16">Setting local gem path</h3>
+<p>
+Bundler <a href="http://bundler.io/v1.3/man/bundle-config.1.html">allows working against a local git repo</a> instead of the remote version.
+</p>
+
+<p>
+To do that, check the following command:
+</p>
+
+<div class="org-src-container">
+
+<pre  class="src src-sh"><span style="color: #998f84;"># </span><span style="color: #998f84;">bundle config local.GEM_NAME /path/to/local/git/repository</span>
+<span style="color: #998f84;"># </span><span style="color: #998f84;">for instance, to use a local rack checkout:</span>
+<span style="color: #7b6a00;">bundle</span> <span style="color: #0083d4;">config</span> <span style="color: #a85300;">local.rack</span> <span style="color: #9e3cc3;">~/Work/git/rack</span>
+</pre>
+</div>
+
+</section>
+<section >
+<p>
+Bundler also ensures that the current revision in the Gemfile.lock exists in
+the local git repository, so you won't have a version mismatch while using
+this.
+</p>
+
+<p>
+This feature is particularly useful when debugging gems - you can make
+changes to the local git repo and just stash/discard them via git when done.
+</p>
+
+<p>
+You can also do the same via the `path` option in <a href="http://bundler.io/v1.5/gemfile.html">Gemfile</a>:
+</p>
+
+<div class="org-src-container">
+
+<pre  class="src src-ruby"><span style="color: #0085aa;">gem</span> <span style="color: #f4cf86;">'rack'</span>, <span style="color: #b88853;">path:</span> <span style="color: #f4cf86;">'~/Work/git/rack'</span>
+</pre>
+</div>
+</section>
+</section>
+<section>
+<section id="slide-orgee9c265">
+<h2 id="orgee9c265">git</h2>
+<div class="outline-text-2" id="text-orgee9c265">
+</div></section>
+</section>
+<section>
+<section id="slide-orga6d8a1b">
+<h3 id="orga6d8a1b">Commit message template</h3>
+<p>
+According to the <a href="https://git-scm.com/docs/git-config#git-config-committemplate">git-config docs</a>, the `config.template` option allows one to
+specify a commit message template that will be automatically filled in when
+running `git commit`.
+</p>
+
+<p>
+Coupled with <a href="http://githooks.com/">git hooks</a>, you can automate most boring parts of the git message
+workflow. One tip: combining a post-checkout hook, a branch name
+convention based on the current ticket and the aforementioned template file
+to auto-fill the ticket number in the commit message.
+</p>
+</section>
+</section>
+<section>
+<section id="slide-orgf9ae66e">
+<h2 id="orgf9ae66e">Ruby-prof</h2>
+<p>
+Please refer to <a href="http://dcluna.github.io/2016/12/02/profiling_ruby_code/">this blog post</a> for more info.
+</p>
+</section>
+</section>
+</div>
+</div>
+<script src="http://cdn.jsdelivr.net/reveal.js/3.0.0/lib/js/head.min.js"></script>
+<script src="http://cdn.jsdelivr.net/reveal.js/3.0.0/js/reveal.js"></script>
+
+<script>
+// Full list of configuration options available here:
+// https://github.com/hakimel/reveal.js#configuration
+Reveal.initialize({
+
+controls: true,
+progress: true,
+history: true,
+center: true,
+slideNumber: 'c',
+rollingLinks: true,
+keyboard: true,
+overview: true,
+width: 1200,
+height: 800,
+margin: 0.00,
+minScale: 0.10,
+maxScale: 1.00,
+
+theme: Reveal.getQueryHash().theme, // available themes are in /css/theme
+transition: Reveal.getQueryHash().transition || 'none', // default/cube/page/concave/zoom/linear/fade/none
+transitionSpeed: 'default',
+multiplex: {
+    secret: '', // null if client
+    id: '', // id, obtained from socket.io server
+    url: '' // Location of socket.io server
+},
+
+// Optional libraries used to extend on reveal.js
+dependencies: [
+ { src: 'http://cdn.jsdelivr.net/reveal.js/3.0.0/lib/js/classList.js', condition: function() { return !document.body.classList; } },
+ { src: 'http://cdn.jsdelivr.net/reveal.js/3.0.0/plugin/markdown/marked.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+ { src: 'http://cdn.jsdelivr.net/reveal.js/3.0.0/plugin/markdown/markdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+ { src: 'http://cdn.jsdelivr.net/reveal.js/3.0.0/plugin/zoom-js/zoom.js', async: true, condition: function() { return !!document.body.classList; } },
+ { src: 'http://cdn.jsdelivr.net/reveal.js/3.0.0/plugin/notes/notes.js', async: true, condition: function() { return !!document.body.classList; } }]
+});
+</script>
+</body>
+</html>

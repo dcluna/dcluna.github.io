@@ -24,3 +24,6 @@ paginate:         5
 
 github:
   repo:           https://www.github.com/dcluna
+
+collections:
+  - presentations
