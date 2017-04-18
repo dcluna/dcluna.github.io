@@ -1,0 +1,1068 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<title>Minor macro wizardry: Lisp metaprogramming and why you should care</title>
+<meta name="author" content="(Daniel Luna)"/>
+<style type="text/css">
+.underline { text-decoration: underline; }
+</style>
+<link rel="stylesheet" href="http://cdn.jsdelivr.net/reveal.js/3.0.0/css/reveal.css"/>
+
+<link rel="stylesheet" href="http://cdn.jsdelivr.net/reveal.js/3.0.0/css/theme/night.css" id="theme"/>
+
+
+<!-- If the query includes 'print-pdf', include the PDF print sheet -->
+<script>
+    if( window.location.search.match( /print-pdf/gi ) ) {
+        var link = document.createElement( 'link' );
+        link.rel = 'stylesheet';
+        link.type = 'text/css';
+        link.href = 'http://cdn.jsdelivr.net/reveal.js/3.0.0/css/print/pdf.css';
+        document.getElementsByTagName( 'head' )[0].appendChild( link );
+    }
+</script>
+</head>
+<body>
+<div class="reveal">
+<div class="slides">
+<section id="sec-title-slide"><h1 class="title">Minor macro wizardry: Lisp metaprogramming and why you should care</h1>
+</section>
+
+<section>
+<section id="slide-orgde9c4b4">
+<h2 id="orgde9c4b4">Motivation</h2>
+<p class="fragment roll-in">
+Metaprogramming is one distinguishing feature of "advanced" programming
+languages. Rails is famous for its clever uses of metaprogramming techniques,
+and Template Haskell gives support for compile-time evaluation.
+</p>
+
+<p class="fragment roll-in">
+However, these techniques are not new. A long time ago, in a <a href="https://en.wikipedia.org/wiki/Viaweb" class="fragment roll-in">company</a> far, far
+away, a very clever programmer (and <a href="https://en.wikipedia.org/wiki/Paul_Graham_(computer_programmer)">now CEO</a> of a <a href="https://en.wikipedia.org/wiki/Y_Combinator_(company)">seed accelerator</a> named after a
+certain <a href="https://en.wikipedia.org/wiki/Fixed-point_combinator#Derivation_of_the_Y_combinator">fixed-point combinator</a>) wrote the book on how these techniques can be
+used to improve our code.
+</p>
+
+<p class="fragment roll-in">
+He wrote the book <a href="http://www.paulgraham.com/onlisp.html" class="fragment roll-in">On Lisp</a>.
+</p>
+
+<blockquote  class="fragment roll-in">
+<p>
+Pun totally intended!
+</p>
+</blockquote>
+
+</section>
+</section>
+<section>
+<section id="slide-org4f39e83">
+<h2 id="org4f39e83">Why Lisp?</h2>
+<p>
+Why choose a dated and perhaps dead (sorry, Clojure fans) language to describe
+these techniques?
+</p>
+
+<p>
+The answer is in a Latin-sounding word that's thrown around in programming
+language forums a lot: homoiconicity.
+</p>
+
+</section>
+</section>
+<section>
+<section id="slide-org83d8a1e">
+<h3 id="org83d8a1e">Refresher on your Compilers course</h3>
+<p>
+Grossly speaking, the front-end of a compiler does the following:
+</p>
+
+<ul>
+<li><p>
+Lexical analysis
+</p>
+
+<p>
+Collects input characters and turns them into "tokens" (grossly
+corresponding to a "word" in the language). This is what a tool such as <a href="https://en.wikipedia.org/wiki/Flex_lexical_analyser">Flex</a>
+does.
+</p></li>
+
+</ul>
+
+</section>
+<section >
+<p>
+In Ruby, you can use <a href="http://ruby-doc.org/stdlib-2.0.0/libdoc/ripper/rdoc/Ripper.html">Ripper</a> (built-in) to check how a lexed program looks like:
+</p>
+
+<div class="org-src-container">
+
+<pre  class="src src-ruby"><span style="color: #006FE0;">require</span> <span style="color: #008000;">'ripper'</span>
+<span style="color: #006FE0;">require</span> <span style="color: #008000;">'pp'</span>
+
+<span style="color: #0077fa;">pp</span> <span style="color: #6434A3;">Ripper</span>.<span style="color: #004cf3;">lex</span><span style="color: #707183;">(</span><span style="color: #008000;">&lt;&lt;-EOF</span>
+<span style="color: #008000;">5.times do |n|</span>
+<span style="color: #008000;">puts n * n</span>
+<span style="color: #008000;">end</span>
+<span style="color: #008000;">EOF</span>
+<span style="color: #707183;">)</span>
+<span style="color: #8D8D84;"># </span><span style="color: #8D8D84; font-style: italic;">=&gt; [[[1, 0], :on_int, "5"],</span>
+<span style="color: #8D8D84;">#     </span><span style="color: #8D8D84; font-style: italic;">[[1, 1], :on_period, "."],</span>
+<span style="color: #8D8D84;">#     </span><span style="color: #8D8D84; font-style: italic;">[[1, 2], :on_ident, "times"],</span>
+<span style="color: #8D8D84;">#     </span><span style="color: #8D8D84; font-style: italic;">[[1, 7], :on_sp, " "],</span>
+<span style="color: #8D8D84;">#     </span><span style="color: #8D8D84; font-style: italic;">[[1, 8], :on_kw, "do"],</span>
+<span style="color: #8D8D84;">#     </span><span style="color: #8D8D84; font-style: italic;">[[1, 10], :on_sp, " "],</span>
+<span style="color: #8D8D84;">#     </span><span style="color: #8D8D84; font-style: italic;">[[1, 11], :on_op, "|"],</span>
+<span style="color: #8D8D84;">#     </span><span style="color: #8D8D84; font-style: italic;">[[1, 12], :on_ident, "n"],</span>
+<span style="color: #8D8D84;">#     </span><span style="color: #8D8D84; font-style: italic;">[[1, 13], :on_op, "|"],</span>
+<span style="color: #8D8D84;">#     </span><span style="color: #8D8D84; font-style: italic;">[[1, 14], :on_ignored_nl, "\n"],</span>
+<span style="color: #8D8D84;">#     </span><span style="color: #8D8D84; font-style: italic;">[[2, 0], :on_ident, "puts"],</span>
+<span style="color: #8D8D84;">#     </span><span style="color: #8D8D84; font-style: italic;">[[2, 4], :on_sp, " "],</span>
+<span style="color: #8D8D84;">#     </span><span style="color: #8D8D84; font-style: italic;">[[2, 5], :on_ident, "n"],</span>
+<span style="color: #8D8D84;">#     </span><span style="color: #8D8D84; font-style: italic;">[[2, 6], :on_sp, " "],</span>
+<span style="color: #8D8D84;">#     </span><span style="color: #8D8D84; font-style: italic;">[[2, 7], :on_op, "*"],</span>
+<span style="color: #8D8D84;">#     </span><span style="color: #8D8D84; font-style: italic;">[[2, 8], :on_sp, " "],</span>
+<span style="color: #8D8D84;">#     </span><span style="color: #8D8D84; font-style: italic;">[[2, 9], :on_ident, "n"],</span>
+<span style="color: #8D8D84;">#     </span><span style="color: #8D8D84; font-style: italic;">[[2, 10], :on_nl, "\n"],</span>
+<span style="color: #8D8D84;">#     </span><span style="color: #8D8D84; font-style: italic;">[[3, 0], :on_kw, "end"],</span>
+<span style="color: #8D8D84;">#     </span><span style="color: #8D8D84; font-style: italic;">[[3, 3], :on_nl, "\n"]]</span>
+</pre>
+</div>
+
+</section>
+<section >
+<ul>
+<li><p>
+Syntactic analysis
+</p>
+
+<p>
+Uses the information from the step above to build a hierarchical
+structure - usually a <a href="https://en.wikipedia.org/wiki/Parse_tree">parse tree</a> or, as more usually known, an <a href="https://en.wikipedia.org/wiki/Abstract_syntax_tree">abstract
+syntax tree</a> (AST for short).
+</p>
+
+</section>
+<section >
+<p>
+Easier to understand this structure with a picture:
+</p>
+
+
+<div id="org11d8cd6" class="figure">
+<p><a href="ast-example.png"><img src="ast-example.png" alt="ast-example.png" /></a>
+</p>
+<p><span class="figure-number">Figure 1: </span>parse tree example</p>
+</div></li>
+
+</ul>
+</section>
+<section >
+<p>
+Again, there are examples in Ruby, using the same module. Using the same code
+as above, we can see something like this:
+</p>
+
+</section>
+<section >
+<div class="org-src-container">
+
+<pre  class="fragment roll-in">     <span style="color: #006FE0;">require</span> <span style="color: #008000;">'ripper'</span>
+     <span style="color: #006FE0;">require</span> <span style="color: #008000;">'pp'</span>
+
+     <span style="color: #0077fa;">pp</span> <span style="color: #6434A3;">Ripper</span>.<span style="color: #5c6400;">sexp</span><span style="color: #707183;">(</span><span style="color: #008000;">&lt;&lt;-EOF</span>
+<span style="color: #008000;">5.times do |n|</span>
+<span style="color: #008000;">  puts n * n</span>
+<span style="color: #008000;">end</span>
+<span style="color: #008000;">EOF</span>
+<span style="color: #707183;">)</span>
+<span style="color: #8D8D84;"># </span><span style="color: #8D8D84; font-style: italic;">[:program,</span>
+<span style="color: #8D8D84;">#  </span><span style="color: #8D8D84; font-style: italic;">[[:method_add_block,</span>
+<span style="color: #8D8D84;">#    </span><span style="color: #8D8D84; font-style: italic;">[:call, [:@int, "5", [1, 0]], :".", [:@ident, "times", [1, 2]]],</span>
+<span style="color: #8D8D84;">#    </span><span style="color: #8D8D84; font-style: italic;">[:do_block,</span>
+<span style="color: #8D8D84;">#     </span><span style="color: #8D8D84; font-style: italic;">[:block_var,</span>
+<span style="color: #8D8D84;">#      </span><span style="color: #8D8D84; font-style: italic;">[:params, [[:@ident, "n", [1, 12]]], nil, nil, nil, nil, nil, nil],</span>
+<span style="color: #8D8D84;">#      </span><span style="color: #8D8D84; font-style: italic;">false],</span>
+<span style="color: #8D8D84;">#     </span><span style="color: #8D8D84; font-style: italic;">[[:command,</span>
+<span style="color: #8D8D84;">#       </span><span style="color: #8D8D84; font-style: italic;">[:@ident, "puts", [2, 2]],</span>
+<span style="color: #8D8D84;">#       </span><span style="color: #8D8D84; font-style: italic;">[:args_add_block,</span>
+<span style="color: #8D8D84;">#        </span><span style="color: #8D8D84; font-style: italic;">[[:binary,</span>
+<span style="color: #8D8D84;">#          </span><span style="color: #8D8D84; font-style: italic;">[:var_ref, [:@ident, "n", [2, 7]]],</span>
+<span style="color: #8D8D84;">#          </span><span style="color: #8D8D84; font-style: italic;">:*,</span>
+<span style="color: #8D8D84;">#          </span><span style="color: #8D8D84; font-style: italic;">[:var_ref, [:@ident, "n", [2, 11]]]]],</span>
+<span style="color: #8D8D84;">#        </span><span style="color: #8D8D84; font-style: italic;">false]]]]]]]</span>
+</pre>
+</div>
+
+</section>
+<section >
+<p class="fragment roll-in">
+This structure is what gets actually run by Ruby - it's converted to YARV
+bytecode, optimized a bit, then executed (details are left to the reader).
+</p>
+
+</section>
+<section >
+<p class="fragment roll-in">
+Notice what we just did in this example: we transformed a stream of
+characters into a data structure that can be manipulated INSIDE the language.
+This structure is named a symbolic expression, <a href="https://en.wikipedia.org/wiki/S-expression" class="fragment roll-in">s-expression</a>, or, if you
+really want to be terse, sexp.
+</p>
+
+<p class="fragment roll-in">
+Only problem is, I don't really want to do that. I don't know how Ruby maps
+to this "weird" notation, and even if I did, working with all these arrays
+seems tedious&#x2026;
+</p>
+
+</section>
+</section>
+<section>
+<section id="slide-org171673e">
+<h3 id="org171673e">Homoiconicity, for real</h3>
+<p>
+Imagine if there was an interpreter for sexps. One that took s-expressions as
+input, and executed them as any other programming language. Also imagine that
+this interpreter was the simplest one that you've ever seen: one that fit in
+one page of code. Don't believe such a thing could exist?
+</p>
+
+</section>
+<section >
+<p>
+This is the definition of eval (taken from this <a href="http://norvig.com/lispy2.html">article</a>) for the original Lisp interpreter, written by
+<a href="https://en.wikipedia.org/wiki/Steve_Russell_(computer_scientist)">Steve Russell</a> (who also coded one of the first videogames in the world,
+<a href="https://en.wikipedia.org/wiki/Spacewar!">Spacewar!</a>):
+</p>
+
+
+<div id="orgd6e680b" class="figure">
+<p><a href="steve-russell-eval.jpg"><img src="steve-russell-eval.jpg" alt="steve-russell-eval.jpg" /></a>
+</p>
+<p><span class="figure-number">Figure 2: </span>SR's eval</p>
+</div>
+
+</section>
+<section >
+<p>
+So, paraphrasing the well-known Haskell joke about monads:
+</p>
+
+<blockquote  class="fragment roll-in">
+<p>
+Lisp is just an evaluator for abstract syntax trees that implement the lambda calculus!
+</p>
+</blockquote>
+
+<aside class="notes">
+<p>
+Better Lispers in the audience, please correct me if I said some nonsense.
+The lambda calculus reference was my try at nodding that Steve Russell worked
+under John McCarthy, protegé of lambda calculus pioneer Alonzo Church.
+</p>
+
+</aside>
+
+</section>
+<section >
+<p>
+Now we have a very interesting language in our hands: one that can
+manipulate itself, like Ruby (and any language with a parser), but whose
+syntax maps (almost!) one to one to the same data structure used to represent
+it. This means that manipulating a Lisp program with another Lisp program is
+almost trivial.
+</p>
+
+</section>
+</section>
+<section>
+<section id="slide-org1fbc63c">
+<h2 id="org1fbc63c">Macro time!</h2>
+<div class="outline-text-2" id="text-org1fbc63c">
+</div></section>
+</section>
+<section>
+<section id="slide-orgab740c2">
+<h3 id="orgab740c2">So, why so much buzz about Lisp macros?</h3>
+<p>
+Programs that manipulate other programs are kind of a big deal. On the
+theoretical side, we can <a href="http://schemeworkshop.org/2006/11-ghuloum.pdf">implement whole compilers</a> by successful phases of
+transformations on ASTs<sup><a id="fnr.1" class="footref" href="#fn.1">1</a></sup> (and it seems that someone <a href="https://github.com/namin/inc">already did</a>).
+</p>
+
+</section>
+</section>
+<section>
+<section id="slide-org5b04bad">
+<h3 id="org5b04bad">What macros can (and usually) do</h3>
+<p>
+On the practical side, these are the main reasons we'd want to do this:
+</p>
+
+<ol>
+<li><p>
+Custom syntax
+</p>
+
+<p>
+This means trivial things such as implementing <a href="https://en.wikipedia.org/wiki/Anaphoric_macro">anaphoric variants</a> of
+common control structures, to creating new operators that change the
+evaluation order of their arguments.
+</p></li>
+
+<li><p>
+Compile-time code analysis and optimization
+</p>
+
+<p>
+My favorite real-life example of such techniques is <a href="http://weitz.de/cl-ppcre/">CL-PPCRE</a>, the regex
+library.
+</p></li>
+
+<li><p>
+Implementing <a href="https://github.com/LuxLang/lux">completely</a> new <a href="http://www.shenlanguage.org/">languages</a> on top of your <a href="https://www.common-lisp.net/">host language</a>
+</p>
+
+<p>
+DSLs are as easy as they are in, say, Ruby, and with the added benefit of
+possibly being optimized during compile-time. If you take it too far, you
+might end with a completely different language such as Lux or Shen&#x2026;
+</p></li>
+
+</ol>
+
+</section>
+</section>
+<section>
+<section id="slide-org8b8b0e4">
+<h3 id="org8b8b0e4">Quasiquotation, or "how the f#$! do I write macros conveniently?"</h3>
+<p>
+In the Ruby examples above, we discussed how inconvenient it would be if we
+had to traverse and rewrite all those trees in our metaprogram. Here's an
+example of what it would look like in Scheme (shamelessly taken from this
+<a href="http://repository.readscheme.org/ftp/papers/pepm99/bawden.pdf">paper</a><sup><a id="fnr.2" class="footref" href="#fn.2">2</a></sup>):
+</p>
+
+<div class="org-src-container">
+
+<pre  class="src src-scheme"><span style="color: #707183;">(</span><span style="color: #0075ff;">define</span> <span style="color: #004ff6;">array-size</span> <span style="color: #D0372D;">1337</span><span style="color: #707183;">)</span>
+<span style="color: #707183;">(</span><span style="color: #0075ff;">define</span> <span style="color: #8f4f00;">array-name</span> <span style="color: #008000;">"array-name"</span><span style="color: #707183;">)</span>
+<span style="color: #707183;">(</span><span style="color: #0075ff;">define</span> <span style="color: #b600b4;">init-val</span> <span style="color: #008000;">"init-val"</span><span style="color: #707183;">)</span>
+
+<span style="color: #707183;">(</span><span style="color: #d40089;">list</span> '<span style="color: #db001f;">do</span> '<span style="color: #7388D6;">(</span><span style="color: #6c5f00;">i</span> <span style="color: #D0372D;">0</span> <span style="color: #909183;">(</span><span style="color: #6f33e0;">+</span> <span style="color: #D0372D;">1</span> <span style="color: #6c5f00;">i</span><span style="color: #909183;">)</span><span style="color: #7388D6;">)</span>
+      <span style="color: #7388D6;">(</span><span style="color: #d40089;">list</span> <span style="color: #909183;">(</span><span style="color: #d40089;">list</span> '<span style="color: #0067ff;">&gt;=</span> '<span style="color: #6c5f00;">i</span> <span style="color: #004ff6;">array-size</span><span style="color: #909183;">)</span><span style="color: #7388D6;">)</span>
+      <span style="color: #7388D6;">(</span><span style="color: #d40089;">list</span> '<span style="color: #dd006f;">vector-set!</span> <span style="color: #8f4f00;">array-name</span>
+            '<span style="color: #6c5f00;">i</span>
+            <span style="color: #b600b4;">init-val</span><span style="color: #7388D6;">)</span><span style="color: #707183;">)</span>
+
+<span style="color: #8D8D84;">;; </span><span style="color: #8D8D84; font-style: italic;">(do (i 0 (+ 1 i)) ((&gt;= i 1337)) (vector-set! "array-name" i "init-val"))</span>
+</pre>
+</div>
+
+</section>
+<section >
+<p class="fragment roll-in">
+This is tedious, and prone to error for bigger structures ("is it two or
+three calls to 'list' that I need?"). Fortunately, there's <a href="https://en.wikipedia.org/wiki/Quasi-quotation" class="fragment roll-in">quasiquotation</a>,
+that, despite the weird name, is just a "template language" for sexps.
+</p>
+
+</section>
+<section >
+<p class="fragment roll-in">
+Using quasiquotes, the code above can be written thus:
+</p>
+
+<div class="org-src-container">
+
+<pre  class="fragment roll-in"><span style="color: #707183;">(</span><span style="color: #0075ff;">define</span> <span style="color: #004ff6;">array-size</span> <span style="color: #D0372D;">1337</span><span style="color: #707183;">)</span>
+<span style="color: #707183;">(</span><span style="color: #0075ff;">define</span> <span style="color: #8f4f00;">array-name</span> <span style="color: #008000;">"array-name"</span><span style="color: #707183;">)</span>
+<span style="color: #707183;">(</span><span style="color: #0075ff;">define</span> <span style="color: #b600b4;">init-val</span> <span style="color: #008000;">"init-val"</span><span style="color: #707183;">)</span>
+
+`<span style="color: #707183;">(</span><span style="color: #db001f;">do</span> <span style="color: #7388D6;">(</span><span style="color: #6c5f00;">i</span> <span style="color: #D0372D;">0</span> <span style="color: #909183;">(</span><span style="color: #6f33e0;">+</span> <span style="color: #D0372D;">1</span> <span style="color: #6c5f00;">i</span><span style="color: #909183;">)</span><span style="color: #7388D6;">)</span> <span style="color: #7388D6;">(</span><span style="color: #909183;">(</span><span style="color: #0067ff;">&gt;=</span> <span style="color: #6c5f00;">i</span> ,<span style="color: #004ff6;">array-size</span><span style="color: #909183;">)</span><span style="color: #7388D6;">)</span> <span style="color: #7388D6;">(</span><span style="color: #dd006f;">vector-set!</span> ,<span style="color: #8f4f00;">array-name</span> <span style="color: #6c5f00;">i</span> ,<span style="color: #b600b4;">init-val</span><span style="color: #7388D6;">)</span><span style="color: #707183;">)</span>
+
+<span style="color: #8D8D84;">;; </span><span style="color: #8D8D84; font-style: italic;">(do (i 0 (+ 1 i)) ((&gt;= i 1337)) (vector-set! "array-name" i "init-val"))</span>
+<span style="color: #8D8D84;">;; </span><span style="color: #8D8D84; font-style: italic;">exactly the same as above!</span>
+</pre>
+</div>
+
+</section>
+</section>
+<section>
+<section id="slide-org41f508d">
+<h3 id="org41f508d">Tips for writing macros</h3>
+</section>
+<section >
+<p>
+These are mostly taken from this <a href="https://www.youtube.com/watch?v=npa2PO4gAMo&amp;t=3626s">awesome presentation</a> by <a href="http://swannodette.github.io/">David Nolen</a>, a
+famous programmer in the Clojure community.
+</p>
+
+<iframe width="560" height="315" src="https://www.youtube.com/embed/npa2PO4gAMo" frameborder="0" allowfullscreen></iframe>
+
+</section>
+<section >
+
+<ul>
+<li>Write a function that generates the expansion you want</li>
+
+<li>Write unit tests for that function</li>
+
+<li>Wrap it in a defmacro for syntactic goodness</li>
+
+<li><p>
+Check the expansion using macroexpand facilities (<a href="https://github.com/joddie/macrostep">Emacs</a> helps a lot here)
+</p>
+
+</section>
+<section >
+<p>
+Real-life example: this small macro I wrote to complement a Spacemacs
+macro:
+</p>
+<div class="org-src-container">
+
+<pre  class="src src-elisp"><span style="color: #707183;">(</span><span style="color: #c50000;">defmacro</span> <span style="color: #0078f7;">dcl/add-env-toggle</span> <span style="color: #7388D6;">(</span><span style="color: #007bcc;">toggle-var</span> <span style="color: #007bcf;">toggle-key</span> <span style="color: #6434A3;">&amp;optional</span> <span style="color: #007938;">toggle-on-expression</span><span style="color: #7388D6;">)</span>
+  <span style="color: #7388D6;">(</span><span style="color: #007bd9;">let</span> <span style="color: #909183;">(</span><span style="color: #709870;">(</span><span style="color: #c70000;">toggle-var-interned</span> <span style="color: #907373;">(</span><span style="color: #007945;">intern</span> <span style="color: #6276BA;">(</span><span style="color: #785b00;">s-replace</span> <span style="color: #008000;">"_"</span> <span style="color: #008000;">"-"</span> <span style="color: #858580;">(</span><span style="color: #006f00;">downcase</span> <span style="color: #007bcc;">toggle-var</span><span style="color: #858580;">)</span><span style="color: #6276BA;">)</span><span style="color: #907373;">)</span><span style="color: #709870;">)</span>
+        <span style="color: #709870;">(</span><span style="color: #007700;">toggle-on</span> <span style="color: #907373;">(</span><span style="color: #0079f0;">or</span> <span style="color: #007938;">toggle-on-expression</span> <span style="color: #008000;">"true"</span><span style="color: #907373;">)</span><span style="color: #709870;">)</span><span style="color: #909183;">)</span>
+    `<span style="color: #909183;">(</span><span style="color: #007b96;">spacemacs|add-toggle</span> ,<span style="color: #c70000;">toggle-var-interned</span>
+       <span style="color: #006FE0;">:status</span> <span style="color: #709870;">(</span><span style="color: #d30000;">getenv</span> ,<span style="color: #007bcc;">toggle-var</span><span style="color: #709870;">)</span>
+       <span style="color: #006FE0;">:on</span> <span style="color: #709870;">(</span><span style="color: #007ba5;">setenv</span> ,<span style="color: #007bcc;">toggle-var</span> ,<span style="color: #007700;">toggle-on</span><span style="color: #709870;">)</span>
+       <span style="color: #006FE0;">:off</span> <span style="color: #709870;">(</span><span style="color: #007ba5;">setenv</span> ,<span style="color: #007bcc;">toggle-var</span> <span style="color: #007816;">nil</span><span style="color: #709870;">)</span>
+       <span style="color: #006FE0;">:evil-leader</span> ,<span style="color: #709870;">(</span><span style="color: #007b89;">concat</span> <span style="color: #008000;">"ot"</span> <span style="color: #007bcf;">toggle-key</span><span style="color: #709870;">)</span>
+       ,<span style="color: #be1100;">@</span><span style="color: #709870;">(</span><span style="color: #007bdf;">if</span> <span style="color: #007938;">toggle-on-expression</span> <span style="color: #907373;">(</span><span style="color: #d40089;">list</span> <span style="color: #006FE0;">:on-message</span> `<span style="color: #6276BA;">(</span><span style="color: #00782a;">format</span> <span style="color: #008000;">"%s's value is now %s"</span> ,<span style="color: #007bcc;">toggle-var</span> <span style="color: #858580;">(</span><span style="color: #d30000;">getenv</span> ,<span style="color: #007bcc;">toggle-var</span><span style="color: #858580;">)</span><span style="color: #6276BA;">)</span><span style="color: #907373;">)</span><span style="color: #709870;">)</span>
+       <span style="color: #909183;">)</span><span style="color: #7388D6;">)</span><span style="color: #707183;">)</span>
+
+<span style="color: #707183;">(</span><span style="color: #9c00c9;">macroexpand-1</span>
+ '<span style="color: #7388D6;">(</span><span style="color: #0078f7;">dcl/add-env-toggle</span>
+   <span style="color: #008000;">"RUBY_PROF_MEASURE_MODE"</span>
+   <span style="color: #008000;">"rm"</span>
+   <span style="color: #909183;">(</span><span style="color: #005fff;">completing-read</span>
+    <span style="color: #008000;">"Measure mode (default: wall): "</span>
+    '<span style="color: #709870;">(</span><span style="color: #006aff;">wall</span> <span style="color: #006cff;">process</span> <span style="color: #007b97;">cpu</span> <span style="color: #007600;">allocations</span> <span style="color: #0071ff;">memory</span> <span style="color: #0079ef;">gc_time</span> <span style="color: #0077fb;">gc_runs</span><span style="color: #709870;">)</span><span style="color: #909183;">)</span><span style="color: #7388D6;">)</span><span style="color: #707183;">)</span>
+
+<span style="color: #8D8D84;">;; </span><span style="color: #8D8D84; font-style: italic;">(spacemacs|add-toggle ruby-prof-measure-mode :status</span>
+<span style="color: #8D8D84;">;;                    </span><span style="color: #8D8D84; font-style: italic;">(getenv "RUBY_PROF_MEASURE_MODE")</span>
+<span style="color: #8D8D84;">;;                    </span><span style="color: #8D8D84; font-style: italic;">:on</span>
+<span style="color: #8D8D84;">;;                    </span><span style="color: #8D8D84; font-style: italic;">(setenv "RUBY_PROF_MEASURE_MODE"</span>
+<span style="color: #8D8D84;">;;                            </span><span style="color: #8D8D84; font-style: italic;">(completing-read "Measure mode (default: wall): "</span>
+<span style="color: #8D8D84;">;;                                             </span><span style="color: #8D8D84; font-style: italic;">'(wall process cpu allocations memory gc_time gc_runs)))</span>
+<span style="color: #8D8D84;">;;                    </span><span style="color: #8D8D84; font-style: italic;">:off</span>
+<span style="color: #8D8D84;">;;                    </span><span style="color: #8D8D84; font-style: italic;">(setenv "RUBY_PROF_MEASURE_MODE" nil)</span>
+<span style="color: #8D8D84;">;;                    </span><span style="color: #8D8D84; font-style: italic;">:evil-leader "otrm" :on-message</span>
+<span style="color: #8D8D84;">;;                    </span><span style="color: #8D8D84; font-style: italic;">(format "%s's value is now %s" "RUBY_PROF_MEASURE_MODE"</span>
+<span style="color: #8D8D84;">;;                            </span><span style="color: #8D8D84; font-style: italic;">(getenv "RUBY_PROF_MEASURE_MODE")))</span>
+</pre>
+</div></li>
+
+</ul>
+</section>
+</section>
+<section>
+<section id="slide-org7d76f46">
+<h3 id="org7d76f46">Example: Anaphoric macros</h3>
+<p>
+<a href="https://en.wikipedia.org/wiki/Groovy_(programming_language)#Closures">Groovy language</a>, a Ruby-like language for the JVM, has an interesting
+feature: whenever a method that accepts a block, such as map, is given no
+explicit arguments, it automatically creates a variable "it" scoped to the
+block value.
+</p>
+
+<p>
+In other words:
+</p>
+
+<div class="org-src-container">
+
+<pre  class="src src-groovy">[1, 2, 3].map { it + 1 } # =&gt; [2, 3, 4]
+</pre>
+</div>
+
+</section>
+<section >
+<p>
+This is referred to as an anaphora - named after the linguistic device of
+the same name.
+</p>
+
+<p>
+Lisp doesn't have those built-in, but it's straightforward to add them. For
+instance, here's an <a href="https://github.com/emacs-helm/helm/blob/master/helm-lib.el#L168-L174">anaphoric version of if</a>, courtesy of the <a href="https://github.com/emacs-helm/helm">Emacs helm</a>
+package:
+</p>
+
+<div class="org-src-container">
+
+<pre  class="src src-elisp"><span style="color: #707183;">(</span><span style="color: #c50000;">defmacro</span> <span style="color: #0b6f00;">helm-aif</span> <span style="color: #7388D6;">(</span><span style="color: #536600;">test-form</span> <span style="color: #007200;">then-form</span> <span style="color: #6434A3;">&amp;rest</span> <span style="color: #7331df;">else-forms</span><span style="color: #7388D6;">)</span>
+  <span style="color: #036A07;">"Anaphoric version of `</span><span style="color: #D0372D;">if</span><span style="color: #036A07;">'.</span>
+<span style="color: #036A07;">Like `</span><span style="color: #D0372D;">if</span><span style="color: #036A07;">' but set the result of TEST-FORM in a temporary variable called `</span><span style="color: #D0372D;">it</span><span style="color: #036A07;">'.</span>
+<span style="color: #036A07;">THEN-FORM and ELSE-FORMS are then excuted just like in `</span><span style="color: #D0372D;">if</span><span style="color: #036A07;">'."</span>
+  <span style="color: #7388D6;">(</span><span style="color: #cf0000;">declare</span> <span style="color: #909183;">(</span><span style="color: #007a78;">indent</span> <span style="color: #D0372D;">2</span><span style="color: #909183;">)</span> <span style="color: #909183;">(</span><span style="color: #e10052;">debug</span> <span style="color: #246d00;">t</span><span style="color: #909183;">)</span><span style="color: #7388D6;">)</span>
+  `<span style="color: #7388D6;">(</span><span style="color: #007bd9;">let</span> <span style="color: #909183;">(</span><span style="color: #709870;">(</span><span style="color: #e10058;">it</span> ,<span style="color: #536600;">test-form</span><span style="color: #709870;">)</span><span style="color: #909183;">)</span>
+     <span style="color: #909183;">(</span><span style="color: #007bdf;">if</span> <span style="color: #e10058;">it</span> ,<span style="color: #007200;">then-form</span> ,<span style="color: #9707cd;">@else-forms</span><span style="color: #909183;">)</span><span style="color: #7388D6;">)</span><span style="color: #707183;">)</span>
+</pre>
+</div>
+
+<p>
+Notice that this macro is <a href="http://www.bookshelf.jp/texi/onlisp/onlisp_10.html">capturing</a> scope, given that its expansion can
+"shadow" the value of a pre-existing "it" variable.
+</p>
+
+<p>
+There are some techniques to use and avoid this, and I refer the reader to
+<a href="http://unintelligible.org/onlisp/onlisp.html#SEC77">chapter 9 of "On Lisp"</a> for a good discussion.
+</p>
+
+</section>
+<section >
+<p class="fragment roll-in">
+Again, I want to highlight how important this is. If we want a new feature
+in our language, we don't need to wait for the language designers to add it.
+Just create a macro and be done with it.
+</p>
+
+<p class="fragment roll-in">
+This is the highest level of abstraction known so far - the compiler is as
+accessible to the standard programmer as any other library.
+</p>
+
+</section>
+</section>
+<section>
+<section id="slide-org649e882">
+<h3 id="org649e882">A digression</h3>
+
+<div id="orge8105e2" class="figure">
+<p><a href="Lisp-Smalltalk-Haskell.jpg"><img src="Lisp-Smalltalk-Haskell.jpg" alt="Lisp-Smalltalk-Haskell.jpg" /></a> 
+</p>
+<p><span class="figure-number">Figure 3: </span>Lisp, Haskell and Smalltalk</p>
+</div>
+
+</section>
+<section >
+<p>
+This diagram shows clearly the difference between "traditional" Lisp, and its
+modern offshoots. It's important to emphasize that Common Lisp is not
+functional - although it certainly can use this style.
+</p>
+
+</section>
+<section >
+<blockquote nil>
+<p>
+And so the median language, meaning whatever language the median programmer
+uses, moves as slow as an iceberg. Garbage collection, introduced by Lisp in
+about 1960, is now widely considered to be a good thing. Runtime typing,
+ditto, is growing in popularity. Lexical closures, introduced by Lisp in the
+early 1970s, are now, just barely, on the radar screen. Macros, introduced by
+Lisp in the mid 1960s, are still terra incognita.
+</p>
+
+<p>
+&#x2013; Paul Graham, Beating the Averages
+</p>
+</blockquote>
+
+</section>
+<section >
+<p>
+What will we see at the intersection of these three?
+</p>
+
+</section>
+</section>
+<section>
+<section id="slide-org1da59a4">
+<h2 id="org1da59a4">Interesting things macros have been used for</h2>
+<div class="outline-text-2" id="text-org1da59a4">
+</div></section>
+</section>
+<section>
+<section id="slide-orgbe31e1b">
+<h3 id="orgbe31e1b">Early AI programs</h3>
+<p>
+Lisp used to have a reputation as an "AI language" (whatever that means).
+It's not hard to understand when you look at <a href="http://norvig.com/paip.html">PAIP</a> and its <a href="http://norvig.com/paip/README.html">implementations</a> of
+early AI programs:
+</p>
+
+<ul>
+<li><a href="https://en.wikipedia.org/wiki/General_Problem_Solver">General Problem Solver</a> (planning software)</li>
+<li><a href="https://en.wikipedia.org/wiki/ELIZA">ELIZA</a> (for Emacs users, M-x doctor)</li>
+<li><a href="https://en.wikipedia.org/wiki/Macsyma">Macsyma</a> (early computer algebra software - think MATLAB/Maple)</li>
+
+</ul>
+
+<p>
+What all these have in common is their reliance on <a href="https://en.wikipedia.org/wiki/Pattern_matching">pattern-matching</a>.
+</p>
+
+<p>
+These programs are still worth studying for their historical significance,
+and its techniques are well-known in the area of <a href="https://en.wikipedia.org/wiki/Automated_planning_and_scheduling">automated planning</a>.
+</p>
+
+</section>
+</section>
+<section>
+<section id="slide-orga7a3a10">
+<h3 id="orga7a3a10">Meta-object protocol (CLOS)</h3>
+<p>
+An interesting result of this malleability is that Lisp can be made
+object-oriented if need be. And this has been done&#x2026;and written in Lisp,
+unsurprisingly.
+</p>
+
+<p>
+The Common Lisp Object System, or CLOS for short, is the result of this. It
+has many advanced features, one of which is multi dispatch, also known as
+multimethods:
+</p>
+
+<div class="org-src-container">
+
+<pre  class="src src-lisp"><span style="color: #8D8D84;">; </span><span style="color: #8D8D84; font-style: italic;">declare the common argument structure prototype</span>
+<span style="color: #707183;">(</span><span style="color: #00793d;">defgeneric</span> <span style="color: #ca009b;">f</span> <span style="color: #7388D6;">(</span><span style="color: #c70000;">x</span> <span style="color: #007cb6;">y</span><span style="color: #7388D6;">)</span><span style="color: #707183;">)</span> 
+
+<span style="color: #8D8D84;">; </span><span style="color: #8D8D84; font-style: italic;">define an implementation for (f integer t), where t matches all types</span>
+<span style="color: #707183;">(</span><span style="color: #007a70;">defmethod</span> <span style="color: #ca009b;">f</span> <span style="color: #7388D6;">(</span><span style="color: #909183;">(</span><span style="color: #c70000;">x</span> <span style="color: #b82100;">integer</span><span style="color: #909183;">)</span> <span style="color: #007cb6;">y</span><span style="color: #7388D6;">)</span> <span style="color: #D0372D;">1</span><span style="color: #707183;">)</span> 
+
+<span style="color: #707183;">(</span><span style="color: #ca009b;">f</span> <span style="color: #D0372D;">1</span> <span style="color: #D0372D;">2.0</span><span style="color: #707183;">)</span> <span style="color: #8D8D84; font-style: italic;">; =&gt; 1</span>
+
+<span style="color: #8D8D84;">; </span><span style="color: #8D8D84; font-style: italic;">define an implementation for (f integer real)</span>
+<span style="color: #707183;">(</span><span style="color: #007a70;">defmethod</span> <span style="color: #ca009b;">f</span> <span style="color: #7388D6;">(</span><span style="color: #909183;">(</span><span style="color: #c70000;">x</span> <span style="color: #b82100;">integer</span><span style="color: #909183;">)</span> <span style="color: #909183;">(</span><span style="color: #007cb6;">y</span> <span style="color: #0074ff;">real</span><span style="color: #909183;">)</span><span style="color: #7388D6;">)</span> <span style="color: #D0372D;">2</span><span style="color: #707183;">)</span> 
+
+<span style="color: #707183;">(</span><span style="color: #ca009b;">f</span> <span style="color: #D0372D;">1</span> <span style="color: #D0372D;">2.0</span><span style="color: #707183;">)</span> <span style="color: #8D8D84; font-style: italic;">; =&gt; 2 ; dispatch changed at runtime</span>
+</pre>
+</div>
+
+</section>
+<section >
+<p class="fragment roll-in">
+There's a somewhat obscure book detailing the internals of its extension
+language, called <a href="https://en.wikipedia.org/wiki/The_Art_of_the_Metaobject_Protocol" class="fragment roll-in">The Art of the Metaobject Protocol</a>. I encourage you to grab
+a copy if you want to learn more about this, as it's a really interesting
+topic.
+</p>
+
+</section>
+<section >
+<blockquote  class="fragment roll-in">
+<p>
+The venerable master Qc Na was walking with his student, Anton.  Hoping to
+prompt the master into a discussion, Anton said "Master, I have heard that
+objects are a very good thing - is this true?"  Qc Na looked pityingly at
+his student and replied, "Foolish pupil - objects are merely a poor man's
+closures."
+</p>
+
+<p>
+Chastised, Anton took his leave from his master and returned to his cell,
+intent on studying closures.  He carefully read the entire "Lambda: The
+Ultimate&#x2026;" series of papers and its cousins, and implemented a small
+Scheme interpreter with a closure-based object system.  He learned much, and
+looked forward to informing his master of his progress.
+</p>
+
+<p>
+On his next walk with Qc Na, Anton attempted to impress his master by
+saying "Master, I have diligently studied the matter, and now understand
+that objects are truly a poor man's closures."  Qc Na responded by hitting
+Anton with his stick, saying "When will you learn? Closures are a poor man's
+object."  At that moment, Anton became enlightened.
+</p>
+</blockquote>
+
+</section>
+<section >
+<p>
+If you want a real-life explanation of such techniques, look no further than
+<a href="http://letoverlambda.com/">Let over lambda</a>, named after a simple explanation of this technique. The
+book has most chapters freely available online, but the dead tree version is
+worth it if only for its discussion on performance tweaks for Lisp macros.
+</p>
+
+</section>
+</section>
+<section>
+<section id="slide-orgc32e972">
+<h3 id="orgc32e972">FPGA code generation</h3>
+<p>
+There is a <a href="http://lisp-univ-etc.blogspot.com.br/2013/06/lisp-hackers-marc-battyani.html">blog</a>, later turned <a href="https://leanpub.com/lisphackers/read">book</a>, that features interviews with proeminent
+Lisp hackers. One of them is <a href="https://www.linkedin.com/in/marcbattyani/">Marc Battyani</a>, who founded 2 companies that
+write compilers from Lisp to VHDL, to power FPGA devices that are used in
+business applications such as financial algorithms, signal processing
+applications and many others.
+</p>
+
+<p>
+For you to have an idea of how fast FPGA is:
+</p>
+
+</section>
+<section >
+<blockquote  class="fragment roll-in">
+<p>
+For instance on 10Gb/s Ethernet market data packets coming from exchanges
+like the NASDAQ we process the IP/UDP/multicast network stack, extract the
+messages from the packets, parse/decode/filter/normalize those messages,
+maintain the indexed order book data structures, aggregate the price levels
+per stock, generate output messages and finally send them to a server
+through PCI-express or 10Gb/s Ethernet network stacks. The nice thing is
+that we do all that fully pipelined at a rate of one message every 12
+nanoseconds! To have an idea of how fast it is, in 12 ns the light will only
+travel 3.6 meters (11.8 ft). Another way to view this performance is that
+the system can process 83 Millions of financial messages per second without
+any queuing.
+</p>
+</blockquote>
+
+</section>
+<section >
+<p class="fragment roll-in">
+The way they use their internal compiler is also impressive. From the interview:
+</p>
+
+<blockquote  class="fragment roll-in">
+<p>
+The next step is very often to generate some or all the code in other
+languages by designing various domain specific languages (DSL) which will
+take care of the tedious aspects of programming in less powerful languages.
+I really like it when from a few 100s of lines written in a easy to use high
+level DSL we generate 10000 to 60000+ lines of very low level VHDL code
+saving months of development.
+</p>
+
+<p>
+About that point I think I would even say that I'm mostly doing Language
+Oriented Programming by trying to abstract the domain specific knowledge
+into various domain specific languages with very different syntaxes like
+s-expressions, C like or other languages or even sometimes adding to the mix
+some GUI or data-based inputs. Then those DSLs would generate most if not
+all the application code in whatever language is needed be it VHDL, asm, C,
+javascript or Common Lisp.
+</p>
+</blockquote>
+
+</section>
+</section>
+<section>
+<section id="slide-org326434b">
+<h3 id="org326434b">Rewriting a test suite in 24h</h3>
+<p>
+In this <a href="https://circleci.com/blog/rewriting-your-test-suite-in-clojure-in-24-hours/">blog post</a>, a CircleCI dev shows how s/he used Clojure macros to
+"rewrite" their 5k LoC test suite from one test library to another. The
+interesting fact is that, instead of rewriting the source files to conform to
+the new API, the dev used macros to translate the old API to the new one
+automatically.  
+</p>
+
+<p>
+The blog post is worth reading on its own, but the main highlights are:
+</p>
+
+<ul>
+<li><p>
+They used the built-in pattern-matching library, <a href="https://github.com/clojure/core.match">core.match</a>, to implement the actual rewrite rules.
+</p>
+
+<p>
+One example:
+</p>
+
+<div class="org-src-container">
+
+<pre  class="src src-clojure"><span style="color: #707183;">(</span><span style="color: #006cff;">match</span> <span style="color: #7388D6;">[</span><span style="color: #1548f1;">actual</span> <span style="color: #e00039;">arrow</span> <span style="color: #007952;">expected</span><span style="color: #7388D6;">]</span>
+       <span style="color: #7388D6;">[</span><span style="color: #1548f1;">actual</span> '<span style="color: #d9007a;">=&gt;</span> '<span style="color: #1c6e00;">truthy</span><span style="color: #7388D6;">]</span> `<span style="color: #7388D6;">(</span><span style="color: #e0005f;">is</span> ~<span style="color: #1548f1;">actual</span><span style="color: #7388D6;">)</span>
+       <span style="color: #7388D6;">[</span><span style="color: #1548f1;">actual</span> '<span style="color: #d9007a;">=&gt;</span> <span style="color: #007952;">expected</span><span style="color: #7388D6;">]</span> `<span style="color: #7388D6;">(</span><span style="color: #e0005f;">is</span> <span style="color: #909183;">(</span><span style="color: #df002d;">=</span> ~<span style="color: #007952;">expected</span> ~<span style="color: #1548f1;">actual</span><span style="color: #909183;">)</span><span style="color: #7388D6;">)</span>
+       <span style="color: #7388D6;">[</span><span style="color: #1548f1;">actual</span> '<span style="color: #d9007a;">=&gt;</span> <span style="color: #909183;">(</span><span style="color: #ad00bc;">_</span> <span style="color: #D0372D;">:guard</span> <span style="color: #007943;">regex?</span><span style="color: #909183;">)</span><span style="color: #7388D6;">]</span> `<span style="color: #7388D6;">(</span><span style="color: #e0005f;">is</span> <span style="color: #909183;">(</span><span style="color: #306c00;">re-find</span> ~<span style="color: #446900;">contents</span> ~<span style="color: #1548f1;">actual</span><span style="color: #909183;">)</span><span style="color: #7388D6;">)</span>
+       <span style="color: #7388D6;">[</span><span style="color: #1548f1;">actual</span> '<span style="color: #d9007a;">=&gt;</span> <span style="color: #D0372D;">nil</span><span style="color: #7388D6;">]</span> `<span style="color: #7388D6;">(</span><span style="color: #e0005f;">is</span> <span style="color: #909183;">(</span><span style="color: #cd0000;">nil?</span> ~<span style="color: #1548f1;">actual</span><span style="color: #909183;">)</span><span style="color: #7388D6;">)</span><span style="color: #707183;">)</span>
+</pre>
+</div></li>
+
+<li><p>
+A few cases broke and required manual correction
+</p>
+
+<p>
+This shows that macros are no silver bullet. They still got the 90%
+solution working in 24h, though. Not too shabby for a 5k LoC test suite.
+</p></li>
+
+</ul>
+
+</section>
+</section>
+<section>
+<section id="slide-orgb478e76">
+<h2 id="orgb478e76">Metaprogramming in other languages</h2>
+<div class="outline-text-2" id="text-orgb478e76">
+</div></section>
+</section>
+<section>
+<section id="slide-org78e31e0">
+<h3 id="org78e31e0">C / C++</h3>
+<p>
+C (and its sucessor C++) is (in)famous for its text-level macros, that work
+by basic string replacement inside source code. While useful for simpler
+purposes, their usage gets confusing and "dangerous" very quickly. For
+example, using this well-known <a href="http://lists.warhead.org.uk/pipermail/iwe/2005-July/000130.html">example by Mark Jason Dominus</a>:
+</p>
+
+<div class="org-src-container">
+
+<pre  class="src src-c"><span style="color: #808080;">#define</span> <span style="color: #c000a8;">square</span><span style="color: #707183;">(</span><span style="color: #c70000;">x</span><span style="color: #707183;">)</span>      <span style="color: #c70000;">x</span>*<span style="color: #c70000;">x</span>
+<span style="color: #8D8D84;">/* </span><span style="color: #8D8D84; font-style: italic;">this won't work: 2/square(10) =  2/10*10 = 2, but you wanted 0.02 </span><span style="color: #8D8D84;">*/</span>
+<span style="color: #808080;">#define</span> <span style="color: #c000a8;">square</span><span style="color: #707183;">(</span><span style="color: #c70000;">x</span><span style="color: #707183;">)</span> <span style="color: #707183;">(</span><span style="color: #c70000;">x</span>*<span style="color: #c70000;">x</span><span style="color: #707183;">)</span>
+<span style="color: #8D8D84;">/* </span><span style="color: #8D8D84; font-style: italic;">this won't work: square(1+1) = (1+1*1+1) = 3, but you wanted 4 </span><span style="color: #8D8D84;">*/</span>
+<span style="color: #808080;">#define</span> <span style="color: #c000a8;">square</span><span style="color: #707183;">(</span><span style="color: #c70000;">x</span><span style="color: #707183;">)</span> <span style="color: #707183;">(</span><span style="color: #7388D6;">(</span><span style="color: #c70000;">x</span><span style="color: #7388D6;">)</span>*<span style="color: #7388D6;">(</span><span style="color: #c70000;">x</span><span style="color: #7388D6;">)</span><span style="color: #707183;">)</span>
+<span style="color: #8D8D84;">/* </span><span style="color: #8D8D84; font-style: italic;">x =3D 2; square(x++) = ((x++)*(x++)) = 159.8, but you wanted 4 </span><span style="color: #8D8D84;">*/</span>
+</pre>
+</div>
+
+<p>
+This happens because this is a source-level transformation, with no awareness
+at all of the syntactic structure of the C language. Given that the macro
+preprocessor doesn't have access to a parser, it doesn't know how to identify
+if the transformation it is performing is well-formed.
+</p>
+
+<p>
+This gets a little better with C++ templates, which are proven to be
+Turing-equivalent, but nothing is said about their run-time complexity. It's
+possible to write a non-terminating template too&#x2026; (but you can do that in
+Lisp, too ;))
+</p>
+</section>
+</section>
+<section>
+<section id="slide-orgc4f791c">
+<h3 id="orgc4f791c">C#</h3>
+<p>
+The C# language, which is thought by some to be M$'s response to Java,
+included a facility for writing <a href="https://en.wikipedia.org/wiki/Common_Intermediate_Language">MSIL</a> (C# bytecode) directly in the language.
+</p>
+
+<p>
+Later versions included a syntactic convenience - instead of directly writing
+bytecode, it's now possible to write something similar to s-exps through
+<a href="https://msdn.microsoft.com/en-us/library/mt654263.aspx">Expression Tree</a> objects.
+</p>
+
+</section>
+<section >
+<p class="fragment roll-in">
+From this interesting infosec <a href="http://twistedoakstudios.com/blog/Post2540_optimizing-just-in-time-with-expression-trees" class="fragment roll-in">example from a C# consultancy</a>:
+</p>
+
+<blockquote  class="fragment roll-in">
+<p>
+What’s interesting about WarCraft 3’s revision check is that the challenge
+sent by the server is the hash function itself, as opposed to a prefix/suffix
+(Blizzard’s crypto is always “interesting”, sometimes with hilarious
+results). Each time a client connects, the server sends a description of a
+different hash function to apply. For example, you might receive the
+challenge “A=443747131 B=3328179921 C=1040998290 4 A=A^S B=B-C C=C^A A=A+B”,
+which describes how to initialize the hash function’s state (A,B,C) and the
+four operations to apply for each value of S read from the game files.
+</p>
+</blockquote>
+
+</section>
+<section >
+<p class="fragment roll-in">
+The code for compiling a particular expression tree for one of these hashes
+follows:
+</p>
+
+<div class="org-src-container">
+
+<pre  class="fragment roll-in">   var example = new DynamicHasher {
+    InitialState = new[] { 0, 443747131, 332817992, 1040998290 },
+    Steps = new[] {
+        // A += input
+        new DynamicHasher.Step {
+            LeftInputIndex = 1, 
+            RightInputIndex = 0, 
+            Operation = DynamicHasher.Operation.Xor, 
+            OutputIndex = 1
+        },
+        // B -= C
+        new DynamicHasher.Step {
+            LeftInputIndex = 2, 
+            RightInputIndex = 3, 
+            Operation = DynamicHasher.Operation.Subtract, 
+            OutputIndex = 2
+        },
+        // C ^= A
+        new DynamicHasher.Step {
+            LeftInputIndex = 3, 
+            RightInputIndex = 1, 
+            Operation = DynamicHasher.Operation.Xor, 
+            OutputIndex = 3
+        },
+        // A += B
+        new DynamicHasher.Step {
+            LeftInputIndex = 1, 
+            RightInputIndex = 2, 
+            Operation = DynamicHasher.Operation.Add, 
+            OutputIndex = 1
+        }
+    }
+};
+</pre>
+</div>
+
+</section>
+<section >
+<p>
+Results are as follows:
+</p>
+
+<pre class="example">
+Generating dynamically specialized code...
+Done after 45ms
+Timing interpretation vs dynamically generated code of example hash...
+Interpreted: 1622ms, Specialized: 1109ms
+Interpreted: 1536ms, Specialized: 1106ms
+Interpreted: 1532ms, Specialized: 1104ms
+Interpreted: 1538ms, Specialized: 1105ms
+Interpreted: 1540ms, Specialized: 1103ms
+Interpreted: 1531ms, Specialized: 1105ms
+Interpreted: 1542ms, Specialized: 1104ms
+Interpreted: 1534ms, Specialized: 1105ms
+Interpreted: 1547ms, Specialized: 1103ms
+Interpreted: 1545ms, Specialized: 1102ms
+
+(Note that the 45ms delay to generate the code is misleading. It includes a ton
+of static initialization and warmup costs. The next function to be compiled
+takes less than a millisecond to complete. However, since I cared about
+time-to-first-login at the time, I’m going to count the inflated value.)
+</pre>
+
+<p class="fragment roll-in">
+Not bad for such a small piece of code, right?
+</p>
+
+</section>
+</section>
+<section>
+<section id="slide-org380c7a0">
+<h3 id="org380c7a0">Elixir</h3>
+<p>
+Elixir is a "sister" language to Ruby (features similar syntax, but <b>very</b>
+different semantics) that compiles down to Erlang bytecode (for the BEAM VM).
+The original Erlang implementation offers "support" for that in the form of
+the <a href="http://erlang.org/doc/man/erl_id_trans.html">parse_transform</a> function, but Elixir turns it up a few notches by
+offering a backquote-inspired syntax for macros.
+</p>
+
+</section>
+<section >
+<p class="fragment roll-in">
+A simple example:
+</p>
+
+<div class="org-src-container">
+
+<pre  class="fragment roll-in"><span style="color: #ca009b;">defmodule</span> <span style="color: #6434A3;">Unless</span> <span style="color: #db001f;">do</span>
+  <span style="color: #c50000;">defmacro</span> <span style="color: #0076fe;">macro_unless</span><span style="color: #707183;">(</span><span style="color: #007600;">clause</span>, <span style="color: #27408b;">do:</span> <span style="color: #9d4400;">expression</span><span style="color: #707183;">)</span> <span style="color: #db001f;">do</span>
+    <span style="color: #b000ba;">quote</span> <span style="color: #db001f;">do</span>
+      <span style="color: #007bdf;">if</span><span style="color: #707183;">(</span><span style="color: #af00ba;">!unquote</span><span style="color: #7388D6;">(</span><span style="color: #007600;">clause</span><span style="color: #7388D6;">)</span>, <span style="color: #27408b;">do:</span> <span style="color: #007300;">unquote</span><span style="color: #7388D6;">(</span><span style="color: #9d4400;">expression</span><span style="color: #7388D6;">)</span><span style="color: #707183;">)</span>
+    <span style="color: #a500c3;">end</span>
+  <span style="color: #a500c3;">end</span>
+<span style="color: #a500c3;">end</span>
+</pre>
+</div>
+
+<p class="fragment roll-in">
+This implements the <i>unless</i> construct that is also built-in in Ruby. Notice
+that the body of the expression will only be evaluated if <i>clause</i> yields a
+falsey value - exactly the behavior we want for a macro.
+</p>
+
+<p class="fragment roll-in">
+While more approachable than the other solutions presented, it's still a bit
+inconvenient to manipulate (but not much).
+</p>
+
+</section>
+</section>
+<section>
+<section id="slide-orge58f3b0">
+<h2 id="orge58f3b0">What is a high-level language, really?</h2>
+<p>
+As you can see, Lisp's metaprogramming facility blurs the line between a high
+and a low-level language. Given that we can manipulate our programs in every
+level, from a very high-level language such as Prolog (or <a href="https://en.wikipedia.org/wiki/MiniKanren">miniKanren</a>) to
+bit-fiddling and <a href="https://www.pvk.ca/Blog/2014/03/15/sbcl-the-ultimate-assembly-code-breadboard/">assembly-generating</a> code, are Lisps high or low level
+languages?  When the programmer is also language designer, does it really
+matter?
+</p>
+
+</section>
+<section >
+
+<div class="figure">
+<p><a href="XkcdLisp.png"><img src="./XkcdLisp.png" alt="XkcdLisp.png" /></a>
+</p>
+</div>
+
+</section>
+</section>
+<section>
+<section id="slide-orgbb12937">
+<h2 id="orgbb12937">Questions?</h2>
+
+<div class="figure">
+<p><a href="john-mccarthy-programming-completely-wrong.jpg"><img src="./john-mccarthy-programming-completely-wrong.jpg" alt="john-mccarthy-programming-completely-wrong.jpg" /></a> 
+</p>
+</div>
+</div>
+</div>
+<script src="http://cdn.jsdelivr.net/reveal.js/3.0.0/lib/js/head.min.js"></script>
+<script src="http://cdn.jsdelivr.net/reveal.js/3.0.0/js/reveal.js"></script>
+
+<script>
+// Full list of configuration options available here:
+// https://github.com/hakimel/reveal.js#configuration
+Reveal.initialize({
+
+controls: true,
+progress: true,
+history: true,
+center: true,
+slideNumber: 'c',
+rollingLinks: true,
+keyboard: true,
+overview: true,
+width: 1200,
+height: 800,
+margin: 0.00,
+minScale: 0.10,
+maxScale: 1.00,
+
+theme: Reveal.getQueryHash().theme, // available themes are in /css/theme
+transition: Reveal.getQueryHash().transition || 'none', // default/cube/page/concave/zoom/linear/fade/none
+transitionSpeed: 'default',
+multiplex: {
+    secret: '', // null if client
+    id: '', // id, obtained from socket.io server
+    url: '' // Location of socket.io server
+},
+
+// Optional libraries used to extend on reveal.js
+dependencies: [
+ { src: 'http://cdn.jsdelivr.net/reveal.js/3.0.0/lib/js/classList.js', condition: function() { return !document.body.classList; } },
+ { src: 'http://cdn.jsdelivr.net/reveal.js/3.0.0/plugin/markdown/marked.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+ { src: 'http://cdn.jsdelivr.net/reveal.js/3.0.0/plugin/markdown/markdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+ { src: 'http://cdn.jsdelivr.net/reveal.js/3.0.0/plugin/zoom-js/zoom.js', async: true, condition: function() { return !!document.body.classList; } },
+ { src: 'http://cdn.jsdelivr.net/reveal.js/3.0.0/plugin/notes/notes.js', async: true, condition: function() { return !!document.body.classList; } }]
+});
+</script>
+</body>
+</html>
