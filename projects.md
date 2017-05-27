@@ -30,6 +30,7 @@ Developed the UI of their Android app and helped integrate it with the company's
 I've made contributions of varying complexity to the following open source projects:
 
 - [Spacemacs](https://github.com/syl20bnr/spacemacs/)
+- [ruby-prof](https://github.com/ruby-prof/ruby-prof/)
 - [inf-ruby-mode](https://github.com/nonsequitur/inf-ruby/)
 - [rspec-mode](https://github.com/pezra/rspec-mode/)
 - [sass-mode](https://github.com/nex3/sass-mode)

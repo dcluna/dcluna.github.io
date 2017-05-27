@@ -11,6 +11,7 @@ Contact
 =======
 
 * Resume: [Dropbox](https://www.dropbox.com/s/odaf4o969f46rrc/daniel-luna-resume.pdf?dl=0)
+* Keybase: [dcluna](https://keybase.io/dcluna)
 * Email: dancluna at google mail
 * Github: [dcluna](http://www.github.com/dcluna)
 * Linkedin: [dcluna](https://www.linkedin.com/in/dcluna)

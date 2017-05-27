@@ -1,0 +1,74 @@
+==================================================================
+https://keybase.io/dcluna
+--------------------------------------------------------------------
+
+I hereby claim:
+
+  * I am an admin of https://dcluna.github.io
+  * I am dcluna (https://keybase.io/dcluna) on keybase.
+  * I have a public key with fingerprint CC16 9770 FA56 0DB7 C6F7  2FED 9050 76FA D072 46D5
+
+To do so, I am signing this object:
+
+{
+    "body": {
+        "key": {
+            "eldest_kid": "0101056dfc06c08639eb48284a0ef18ae820dcb6184fe532b47aada92bbb52d142200a",
+            "fingerprint": "cc169770fa560db7c6f72fed905076fad07246d5",
+            "host": "keybase.io",
+            "key_id": "905076fad07246d5",
+            "kid": "0101056dfc06c08639eb48284a0ef18ae820dcb6184fe532b47aada92bbb52d142200a",
+            "uid": "00dfaf392e450a1250384f893b276119",
+            "username": "dcluna"
+        },
+        "service": {
+            "hostname": "dcluna.github.io",
+            "protocol": "https:"
+        },
+        "type": "web_service_binding",
+        "version": 1
+    },
+    "ctime": 1495913743,
+    "expire_in": 157680000,
+    "prev": "2faa90b9047d9a6d70ded87888c6a0e314e5618ed50279895c351a704abe6fa9",
+    "seqno": 9,
+    "tag": "signature"
+}
+
+which yields the signature:
+
+-----BEGIN PGP MESSAGE-----
+Version: Keybase OpenPGP v2.0.71
+Comment: https://keybase.io/crypto
+
+yMM9AnicrVJrTBxVGN0FtwHa8miziCKFzjYKlJI7s/PcFqFVHrUBK1gISlnncQfG
+XXaX2dnl0RKkaWNLqiBCVERtQjGgpFiMG6EpLVhSUkgg8qimFVNNmoCSCKwBkYIz
+rf4w8af3/ri533fOuec7uTe2B+pC9I1HvWsTcsa0fnTwA4+uMGE67ATCOYUqxHIC
+scGHB7QL0K1YbZKAWBCAqpsgBZEHJA9o0sxADqcxGmcBFFGahTQGBJ4jURoXIWHG
+OJxiWYFlMI7jCExAcQwDgEWSEFFylEDZJUsORZXleZRkKAqILEECgaN4UqQwEQoM
+IABFiqwAKAwnBUIlljrdGkM1x7FumCw51Zp6sT609x/4/9m355EcEERWNDMYxAnA
+ohgBzCqRZswcRpEoymhAN5QdbBlU0QJv9zhYpCYJUWteiYdarNoc/+onl0hKqYd7
+NJFLdipO3mlXu6WK4nJbNLZS5dLgFZCz/i1k5SSHoCapMrxQdktOB2JBVSSvSJoy
+ijMEg5op3JyEwEqXJEOrpCEIiqSBurR3oFeVxESWZQDHAJwSGJYUKCBAgaZomuZJ
+NSEzikNCzQYKBMAohmYI3kygLAVwloNq3Nq8bljucCIWRrXJlqiSbqnEwSoeGSI1
+Q4NFj+n0IbothgDth+lCgsP/+XcnibAHEdKen8bTFobv5+yKeaoMZLZaXb8b6xri
+m72mtoCcgfm0xK6ISuOtLm8hMuW3f3qve/liRcnbVafKV8aPpzx3JcxWdya+YfFw
+SxFteWLywAzScfk3/NjYt1Ht+cvl2aAeZj/57D73q7f6j496idrwffmxe3jZ9DO5
+dmXk+4mhXY1ts/qNkcgvh2B/wNbmMGdnT/vUoR35QvdHjyvrR+q+cZRfXBn6YyI9
+QV/kiXxxI/HrmbjG65+PBV/Y2ffgk87gqzV702IO52asno9euP/S/NBqT6shuCXJ
+2/H05kG/KT2oszd93oaZDQN5I3Gxxs++iDsUtX4kcK2n7wyes6VRiJxY7KaDqJff
+mZ688NW9WENZQXviwYHkm2X1FkM+OVd7Z3DTd/o1Y8r1F4qPgmuL+fjyXVA/DeVi
+OS+gYdvk6YKohG27n2/d2uOLO9DWPJAxv6P4nJScuhl6qb7a9Gtr81tNFTOvVHLv
+64N2HkrdLYfk9WY1tWfL/rFN6D9py/SG15oS9T5f39XJ3oHznHg7vinimVTjXvPC
+eErfnXdX3jtWeC66P2fWt9/gMi3Nr3lNNqir7nlz9nZwVwEVOvJj1uv4n6lTvdWX
+fOs3orfb506lfpg7HLp0Tcm8GXI2q6AjPtD9g6xUSG0G48awpSW3bG4/RJZ+iVl6
+42P/3e9GV/32y9Rf38i2/A==
+=G0wG
+-----END PGP MESSAGE-----
+
+And finally, I am proving ownership of this host by posting or
+appending to this document.
+
+View my publicly-auditable identity here: https://keybase.io/dcluna
+
+==================================================================
