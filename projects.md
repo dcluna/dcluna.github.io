@@ -36,3 +36,6 @@ I've made contributions of varying complexity to the following open source proje
 - [sass-mode](https://github.com/nex3/sass-mode)
 - [embrace.el](https://github.com/cute-jumper/embrace.el)
 - [shen-elisp](https://github.com/deech/shen-elisp)
+- [rufo](https://github.com/ruby-formatter/rufo)
+- [emacs-rufo](https://github.com/aleandros/emacs-rufo)
+- [rufo.el](https://github.com/danielma/rufo.el)
