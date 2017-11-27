@@ -3,7 +3,7 @@
     <div class="sidebar-about">
       <a href="/about">
           <img src="http://www.gravatar.com/avatar/{{ site.author_gravatar }}.png?s=80" class="gravatar">
-	    </a>
+      </a>
       <h1>
         <a href="{{ site.baseurl }}">
           {{ site.title }}
@@ -29,7 +29,14 @@
         {% endif %}
       {% endfor %}
 
-      <a class="sidebar-nav-item" href="{{ site.github.repo }}">GitHub</a>
+      <div id="socialmedia" class="clearfix sidebar-nav-item">
+          <ul>
+              <li><a title="Resume" href="{{ site.resume.url }}" rel="external"><span class="fa icon-file"></span></a></li>
+              <li><a title="GitHub" href="{{ site.github.repo }}" rel="external"><span class="fa icon-github-sign"></span></a></li>
+              <li><a title="LinkedIn" href="{{ site.linkedin.url }}" rel="external"><span class="fa icon-linkedin"></span></a></li>
+          </ul>
+      </div>
     </nav>
+
   </div>
 </div>

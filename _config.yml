@@ -25,5 +25,11 @@ paginate:         5
 github:
   repo:           https://www.github.com/dcluna
 
+resume:
+  url: https://www.dropbox.com/s/odaf4o969f46rrc/daniel-luna-resume.pdf?dl=0
+
+linkedin:
+  url:  https://www.linkedin.com/in/dcluna
+
 collections:
   - presentations
