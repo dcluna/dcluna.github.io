@@ -10,3 +10,7 @@ title: Presentations
 # [Minor macro wizardry: Lisp metaprogramming and why you should care]({{ site.url }}/presentations/minor-macro-wizardry.html) #
 
 [Presentation]({{ site.url }}/presentations/minor-macro-wizardry.html) focused on explaining why these Lisp programmers look like fanatics when talking about their favorite language.
+
+# [Infosec basics]({{ site.url }}/presentations/web-sec.html) #
+
+[Presentation]({{ site.url }}/presentations/web-sec.html) about common security issues in web application development, accompanied by a live boot2root VM intrusion.
