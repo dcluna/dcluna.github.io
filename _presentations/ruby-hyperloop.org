@@ -1,0 +1,412 @@
+# -*- mode: Org; org-download-image-dir: "./img-ruby-hyperloop"; -*-
+#+OPTIONS: reveal_center:t reveal_progress:t reveal_history:t reveal_control:t
+#+OPTIONS: reveal_mathjax:t reveal_rolling_links:t reveal_keyboard:t reveal_overview:t num:nil
+#+OPTIONS: reveal_width:1200 reveal_height:800
+#+OPTIONS: toc:nil timestamp:nil author:nil ^:nil
+#+REVEAL_MARGIN: 0.0
+#+REVEAL_MIN_SCALE: 0.1
+#+REVEAL_MAX_SCALE: 1.0
+#+REVEAL_TRANS: none
+#+REVEAL_THEME: night
+#+REVEAL_HLEVEL: 2
+#+REVEAL_DEFAULT_FRAG_STYLE: roll-in
+#+REVEAL_ROOT: http://cdn.jsdelivr.net/reveal.js/3.0.0/
+
+#+TITLE: Ruby Hyperloop: isomorphic client-server structures with a sane language
+
+* Overview
+
+  This presentation is focused at showing how Hyperloop - a gem that integrates
+  Rails with a React front-end via Opal - can be used to greatly improve our
+  productivity as a team.
+
+* node.js's promise
+
+  #+BEGIN_QUOTE
+  With Node.js, a fast, stable server-side JavaScript runtime, we can now make
+  this dream a reality. By creating the appropriate abstractions, we can write
+  our application logic such that it runs on both the server and the
+  client — the definition of isomorphic JavaScript.
+
+  - Spike Brehm, Airbnb engineer
+  #+END_QUOTE
+
+  The whole article is worth reading in its entirety: [[https://medium.com/airbnb-engineering/isomorphic-javascript-the-future-of-web-apps-10882b7a2ebc][Isomorphic JS: the future of web apps]]
+
+  #+REVEAL: split
+  #+DOWNLOADED: https://cdn-images-1.medium.com/max/1000/0*Fl8QzTseOXy1c-YT.png @ 2018-05-02 01:52:08
+  #+attr_html: :height 500px :width auto
+  #+CAPTION: Isomorphic MVC
+  #+ATTR_LaTeX: scale=0.75
+  #+LABEL: fig:isomorphic-mvc
+  [[file:./img-ruby-hyperloop/isomorphic-js.png]]
+
+  One language across server and client: same logic everywhere, no "impedance
+  mismatch" between languages/environments.
+
+** Reality
+
+   #+DOWNLOADED: https://res.cloudinary.com/practicaldev/image/fetch/s--jGChYAyx--/c_limit%2Cf_auto%2Cfl_progressive%2Cq_auto%2Cw_880/https://image.ibb.co/i3ybGS/undefined_access.jpg @ 2018-05-02 01:53:36
+   #+CAPTION: Usual JS issue
+   #+ATTR_LaTeX: scale=0.75
+   #+LABEL: fig:usual-js-issue
+   [[file:./img-ruby-hyperloop/cannot-get-property.jpg]]
+
+
+   #+REVEAL: split
+   #+DOWNLOADED: https://cdn-images-1.medium.com/max/721/1*Co0gr64Uo5kSg89ukFD2dw.jpeg @ 2018-05-02 01:55:04
+   #+CAPTION: Hadouken code
+   #+ATTR_LaTeX: scale=0.75
+   #+LABEL: fig:hadouken-code
+   [[file:./img-ruby-hyperloop/hadouken-code.jpeg]]
+
+   #+REVEAL: split
+   #+DOWNLOADED: https://image.slidesharecdn.com/nodejs-sept-2011-110917123011-phpapp01/95/intro-to-nodejs-from-the-perspective-of-a-perl-hacker-20-728.jpg?cb=1316262794 @ 2018-05-02 01:55:49
+   #+CAPTION: node.js's debugging experience
+   #+ATTR_LaTeX: scale=0.75
+   #+LABEL: fig:node-debugging
+   [[file:./img-ruby-hyperloop/node-debugger-basic.jpeg]]
+
+** Another solution
+
+   #+DOWNLOADED: https://developer.telerik.com/wp-content/uploads/2015/09/babel_header.jpg @ 2018-05-02 01:56:49
+   #+CAPTION: Keep calm and transpile
+   #+ATTR_LaTeX: scale=0.75
+   #+LABEL: fig:transpiler
+   [[file:./img-ruby-hyperloop/keep-calm-transpile.jpg]]
+
+   #+REVEAL: split
+   #+DOWNLOADED: https://kebo.xyz/webtranspiler/multiple_languages.png @ 2018-05-02 01:57:50
+   #+attr_html: :height 500px :width auto
+   #+CAPTION: We've been doing this for a while...
+   #+ATTR_LaTeX: scale=0.75
+   #+LABEL: fig:multiplejs
+   [[file:./img-ruby-hyperloop/multi-lang-transpiler.png]]
+
+* Opal
+
+  #+BEGIN_QUOTE
+  Opal is a Ruby to JavaScript source-to-source compiler.
+  It comes packed with the Ruby corelib you know and love.
+  It is both fast as a runtime and small in its footprint.
+  #+END_QUOTE
+
+  [[http://opalrb.com/][Website]], [[https://github.com/fazibear/awesome-opal][awesome-opal repo]]
+
+  #+REVEAL: split
+  #+DOWNLOADED: https://image.slidesharecdn.com/opalchapter4anewhope-130726102424-phpapp02/95/opal-chapter-4anewhope-20-638.jpg?cb=1374841325 @ 2018-05-02 01:58:51
+  #+CAPTION: Why Opal will make you happy
+  #+ATTR_LaTeX: scale=0.75
+  #+LABEL: fig:opalhappy
+  [[file:./img-ruby-hyperloop/opal-happiness.jpeg]]
+
+  #+REVEAL: split
+  Also, good stuff like [[https://github.com/fkchang/opal-irb][opal-irb]]:
+
+  #+REVEAL_HTML: <iframe width="560" height="315" src="https://www.youtube.com/embed/6hUwN5BdSHo" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+
+  #+REVEAL: split
+  Still, it doesn't answer all our questions. How to integrate it with Rails?
+  Can I use something like [[https://ruby-doc.org/stdlib-1.9.3/libdoc/drb/rdoc/DRb.html][dRb]] over a websocket connection? How do I write React
+  code with it? What about tests?
+
+* Enter Hyperloop
+
+  #+BEGIN_QUOTE
+  One language. One model. One set of tests. The same business logic and domain
+  models running on the clients and the server. Hyperloop is fully integrated
+  with Rails and also gives you unfettered access to the complete universe of
+  JavaScript libraries (including React) from within your Ruby code. Hyperloop
+  lets you build beautiful interactive user interfaces in Ruby.
+  #+END_QUOTE
+
+  #+REVEAL: split
+  #+DOWNLOADED: http://ruby-hyperloop.org/images/hyperloop-comps-diagram.png @ 2018-05-02 01:59:38
+  #+CAPTION: Hyperloop COMPS
+  #+ATTR_LaTeX: scale=0.75
+  #+LABEL: fig:hyperloop-comps
+  [[file:./img-ruby-hyperloop/hyperloop-comps-diagram.png]]
+
+** Architecture
+
+   #+CAPTION: Hyperloop architecture
+   #+ATTR_LaTeX: scale=0.75
+   #+LABEL: fig:hyperloop-architecture
+   [[file:./img-ruby-hyperloop/hyperloop-architecture.png][file:./img-ruby-hyperloop/hyperloop-architecture.png]]
+
+* Hyperloop tools
+** Architecture
+*** Components
+
+     #+ATTR_REVEAL: :frag t
+     A Component is just a Ruby class which inherits from Hyperloop::Component.
+     Under the covers, HyperReact uses Opal to compile this Component into
+     JavaScript then hands it to React to mount as a regular JavaScript React
+     Component.
+
+     #+ATTR_REVEAL: :frag t
+     As with React, there are no templates in Hyperloop, your user interface is
+     made up of Components which mix conditional logic and HTML elements to
+     build the user interface. Unlike React, where you code in JSX and
+     JavaScript, Hyperloop lets you keep all your code in Ruby.
+
+     #+ATTR_REVEAL: :frag t
+     It is important to emphasize that Hyperloop gives you full access to all
+     JavaScript libraries and components from directly within your Ruby code.
+     Everything you can do in JavaScript is simple to do in Ruby, this includes
+     passing parameters between Ruby and JavaScript and even passing in Ruby
+     lambdas as JavaScript callbacks.
+
+     #+ATTR_REVEAL: :frag t
+     You can also import JavaScript libraries using NPM/Yarn and
+     Webpack/Webpacker and have them available to your Hyperloop Components.
+
+*** Stores
+
+    Stores are where the state of your Application lives.
+
+    Anything but a completely static web page will have dynamic states that
+    change because of user inputs, the passage of time, or other external
+    events.
+
+    #+REVEAL: split
+    For example here is Store that keeps track of time at a given location:
+
+    #+BEGIN_SRC ruby
+      class WorldClock < HyperStore
+        # Keep track of the time at multiple locations
+        attr_reader :name
+        attr_reader :lattitude
+        attr_reader :longitude
+        attr_reader :time_zone_offset
+
+        def current_time
+          WorldClock.gmt+time_zone_offset
+        end
+
+        def initialize(name, lattitude, longitude, time_zone_offset)
+          @name, @lattitude, @longitude, @time_zone_offset =
+                                         [name, lattitude, longitude, time_zone_offset]
+        end
+
+        def WorldClock.gmt
+          unless state.gmt
+            every(1) { mutate.gmt Time.now.gmt }
+            mutate.gmt Time.now
+          end
+          state.gmt
+        end
+      end
+    #+END_SRC
+
+    #+REVEAL: split
+    Now we can create a clock and post the time to the console every minute like this:
+
+    #+BEGIN_SRC ruby
+      new_york = WorldClock.new('New York', 40.7128, -74.0059, 5.hours)
+      every(1.minute) { puts new_york.current_time }
+    #+END_SRC
+
+    But because it is a Reactive Store we can also say this:
+
+    #+BEGIN_SRC ruby
+      # assume we have a div with id='new-york' some place in our code
+      Element['div#new-york'].render do
+        "The time in #{new_york.name} is #{new_york.current_time}"
+      end
+    #+END_SRC
+
+    This will automatically rerender the contents of the 'new-york' div *whenever the store changes*.
+
+    Stores are Ruby classes that keep the dynamic parts of the state in special
+    state variables. In other words: objects!
+
+*** Models
+
+    Hyperloop gives you full access to the ActiveRecord models on the client or
+    the server which means we can use the models directly within our Components
+    without needing the abstraction of an API:
+
+    #+BEGIN_SRC ruby
+      class BookList < Hyperloop::Component
+        # Display each book in the catalog
+        render(UL) do
+          Book.in_catalog.each do |book|
+            LI { book.name }
+          end
+        end
+      end
+    #+END_SRC
+
+    Changes made to Models on a client or server are *automatically
+    synchronized* to all other authorized connected clients using ActionCable,
+    pusher.com or polling. The synchronization is completely automatic and
+    magical to behold.
+
+** Developer happiness
+
+   - [[http://ruby-hyperloop.org/tools/#hyper-console][Hyper console]]
+
+     #+BEGIN_QUOTE
+     hyper-console will open a new popup window, that is running an IRB style
+     read-eval loop. The console window will compile what ever ruby code you
+     type, and if it compiles, will send it to your main window for execution.
+     The result (or error message) plus any console output will be displayed in
+     the console window.
+     #+END_QUOTE
+
+     #+REVEAL: split
+     #+DOWNLOADED: http://ruby-hyperloop.org/images/hyperconsole-screenshot.png @ 2018-05-02 02:00:53
+     #+attr_html: :height 500px :width auto
+     #+CAPTION: hyperconsole
+     #+ATTR_LaTeX: scale=0.75
+     #+LABEL: fig:hyperconsole
+     [[file:img-ruby-hyperloop/hyperconsole-screenshot_2018-05-02_02-00-53.png]]
+
+     Great for development/debugging!
+
+   #+REVEAL: split
+   - [[http://ruby-hyperloop.org/tools/hyperspec/][Hyper Spec]]
+
+     #+BEGIN_QUOTE
+     With HyperSpec you can run isomorphic specs for all your Hyperloop code
+     using RSpec. Everything runs as standard RSpec test specs.
+
+     Hyper-spec allows you to directly use tools like FactoryGirl (or Hyperloop
+     Operations) to setup some test data, then run a spec to make sure that a
+     component correctly displays, or modifies that data. You can use Timecop to
+     manipulate time and keep in sync between the server and client. This makes
+     testing easier and more realistic without writing a lot of redundant code.
+     #+END_QUOTE
+
+     #+REVEAL: split
+     #+BEGIN_SRC ruby
+       mount 'CallBackOnEveryThirdClick' do
+         class CallBackOnEveryThirdClick < React::Component::Base
+           param :click3, type: Proc
+           def increment_click
+             @clicks ||= 0
+             @clicks = (@clicks + 1)
+             params.click3(@clicks) if @clicks % 3 == 0
+           end
+           render do
+             DIV(class: :tp_clicker) { "click me" }
+               .on(:click) { increment_click }
+           end
+         end
+       end
+
+       7.times { page.click('#tp_clicker') }
+       expect(callback_history_for(:click3)).to eq([[3], [6]])
+     #+END_SRC
+
+   #+REVEAL: split
+   - [[http://ruby-hyperloop.org/tools/hypertrace/][Hyper Trace]]
+
+     Method tracing and conditional breakpoints for Opal and Hyperloop Debug
+
+   #+REVEAL: split
+   #+DOWNLOADED: https://cloud.githubusercontent.com/assets/63146/19624133/48098fce-98b6-11e6-9198-cc5eae836ccf.png @ 2018-05-02 02:01:53
+   #+attr_html: :height 500px :width auto
+   #+CAPTION: hypertrace
+   #+ATTR_LaTeX: scale=0.75
+   #+LABEL: fig:hypertrace
+   [[file:img-ruby-hyperloop/48098fce-98b6-11e6-9198-cc5eae836ccf_2018-05-02_02-01-51.png]]
+
+     The trace log uses the javascript console grouping mechanism, so you can
+     explore in detail the args, return values and state of the instance as each
+     method executes.
+
+   #+REVEAL: split
+   - [[http://ruby-hyperloop.org/tutorials/hyperlooprails/opalhotreloader/][Opal Hot-Reloader]]
+
+   #+DOWNLOADED: http://ruby-hyperloop.org/images/tutorials/Hyperloop-Railsopalhotreloader.gif @ 2018-05-02 02:02:13
+   #+CAPTION: Opal hot reloader
+   #+ATTR_LaTeX: scale=0.75
+   #+LABEL: fig:opal-hot-reloader
+   [[file:img-ruby-hyperloop/Hyperloop-Railsopalhotreloader_2018-05-02_02-02-13.gif]]
+
+   #+ATTR_REVEAL: :frag t
+   #+BEGIN_QUOTE
+   Opal Hot Reloader is going to just dynamically (via a websocket connection)
+   reload chunks of code in the page almost instaneously
+   #+END_QUOTE
+
+* Why bother with all this?
+** The good stuff
+
+  - Quicker iterations
+  - Easily share code between server and client
+  - Same code/business entity in the client and the server
+  #+REVEAL: split
+  - Full stack developers
+
+  #+DOWNLOADED: https://cdn-images-1.medium.com/max/1600/0*oRIVuWSZQ-io7WUw.png @ 2018-05-02 02:25:25
+  #+attr_html: :height 500px :width auto
+  #+CAPTION: Full stack developer competences
+  #+ATTR_LaTeX: scale=0.75
+  #+LABEL: fig:full-stack-dev
+  [[file:img-ruby-hyperloop/full-stack-dev.png]]
+
+  People would still have their preferred areas, but they wouldn't be siloed -
+  overall productivity would be increased.
+
+  #+REVEAL: split
+  - It's all Ruby!
+
+  #+DOWNLOADED: https://cdn02.nintendo-europe.com/media/images/10_share_images/games_15/game_boy_advance_7/SI_GBA_PokemonRuby_enGB_image1600w.jpg @ 2018-05-02 02:07:47
+  #+CAPTION: Most people's favorite Ruby
+  #+ATTR_LaTeX: scale=0.75
+  #+LABEL: fig:favorite-ruby
+  [[file:img-ruby-hyperloop/SI_GBA_PokemonRuby_enGB_image1600w_2018-05-02_02-07-47.jpg]]
+
+  #+REVEAL: split
+  #+DOWNLOADED: https://cdn-images-1.medium.com/max/1600/0*VXJYOp8UzIL33HvA. @ 2018-05-02 02:08:07
+  #+CAPTION: Matz on why to use Ruby
+  #+ATTR_LaTeX: scale=0.75
+  #+LABEL: fig:matz-why-ruby
+  [[file:img-ruby-hyperloop/matz-why-ruby.png]]
+
+** Drawbacks
+
+   #+DOWNLOADED: https://i.ytimg.com/vi/6Co0qmCvgq0/maxresdefault.jpg @ 2018-05-02 02:55:03
+   #+CAPTION: Opal/Hyperloop complexity
+   #+attr_html: :height 500px :width auto
+   #+ATTR_LaTeX: scale=0.75
+   #+LABEL: fig:opal-hyperloop-complexity
+   [[file:img-ruby-hyperloop/maxresdefault_2018-05-02_02-55-03.jpg]]
+
+   #+REVEAL: split
+   - Learning curve
+
+   #+DOWNLOADED: http://www.stephencalenderblog.com/images/LearningTechComic.jpg @ 2018-05-02 02:10:41
+   #+CAPTION: Learning curve for a technology
+   #+ATTR_LaTeX: scale=0.75
+   #+LABEL: fig:learning-curve
+   [[file:img-ruby-hyperloop/LearningTechComic_2018-05-02_02-10-41.jpg]]
+
+   #+REVEAL: split
+   - How well does it map to React / Flux?
+
+     I'd expect React devs to give their opinions on this. I honestly think this
+     may be great for you, since it'll make it _way_ easier to write FE code
+     without bothering with APIs and such, but _maybe_ it's too weird?
+
+   #+REVEAL: split
+   #+DOWNLOADED: https://image.slidesharecdn.com/rubyandrails-2011-10-23-update-111023095239-phpapp02/95/rails-extjs-and-netzke-48-728.jpg?cb=1319363597 @ 2018-05-02 02:19:34
+   #+attr_html: :height 500px :width auto
+   #+CAPTION: Client-server communication: Ruby X JS
+   #+ATTR_LaTeX: scale=0.75
+   #+LABEL: fig:ruby-js-comparison
+   [[file:img-ruby-hyperloop/rails-extjs-and-netzke-48-728_2018-05-02_02-19-34.jpeg]]
+
+* Questions? (and maybe demo time)
+
+  #+DOWNLOADED: https://i.pinimg.com/originals/62/69/0d/62690d04ccece5683d2d6486d3303b19.jpg @ 2018-05-02 02:29:32
+  #+CAPTION: Questions?
+  #+ATTR_LaTeX: scale=0.75
+  #+LABEL: fig:questions
+  [[file:img-ruby-hyperloop/62690d04ccece5683d2d6486d3303b19_2018-05-02_02-29-32.jpg]]
+
+  #+REVEAL: split
+  How can we use this in our projects right now?

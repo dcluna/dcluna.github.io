@@ -14,3 +14,7 @@ title: Presentations
 # [Infosec basics]({{ site.url }}/presentations/web-sec.html) #
 
 [Presentation]({{ site.url }}/presentations/web-sec.html) about common security issues in web application development, accompanied by a live boot2root VM intrusion.
+
+# [Ruby Hyperloop]({{ site.url }}/presentations/ruby-hyperloop.html) #
+
+[Presentation]({{ site.url }}/presentations/ruby-hyperloop.html) about Ruby-Hyperloop, the isomorphic Ruby web framework.
