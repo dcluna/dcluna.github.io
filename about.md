@@ -3,9 +3,11 @@ layout: page
 title: About Me
 ---
 
-Software developer with experience in web and mobile (native Android and hybrid) projects, ad distribution technology, algorithmic trading. Learning something new every day. This is a space to share this knowledge. 
+Software engineer with experience in many domains, currently focusing on back-end development.
 
-I am currently open to new projects. 
+Interested in security and [OSCP](https://www.offensive-security.com/information-security-certifications/oscp-offensive-security-certified-professional/) certified.
+
+![]({{ site.url }}/public/offsec-student-certified-emblem-rgb-oscp.png)
 
 Contact
 =======
