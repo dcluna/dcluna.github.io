@@ -1,11 +1,13 @@
 ---
 layout: post
 title: Mr Robot VM Walkthrough
+description: Walkthrough of Vulnhub's Mr Robot VM
+image: public/posts/mrrobot/mr-robot.png
 ---
 
 # Walkthrough
 
-![]({{ site.url }}/public/posts/mrrobot/mr-robot.png)
+![Hackerman rhapsody]({{ site.url }}/public/posts/mrrobot/mr-robot.png "Hackerman rhapsody")
 
 As stated, this machine wasn't too difficult but it was fun nevertheless. I rooted it as part of a work presentation to showcase a common intrusion scenario.
 
@@ -98,7 +100,7 @@ robot:c3fcd3d76192e4007dfb496cca67e13b
 
 Guess what is that? A password that we can crack with some feline help:
 
-![]({{ site.url }}/public/posts/mrrobot/hashcat-crazy.gif)
+![Sadly not the first result when searching for 'hash cat']({{ site.url }}/public/posts/mrrobot/hashcat-crazy.gif "Sadly not the first result when searching for 'hash cat'")
 
 ```sh
 echo c3fcd3d76192e4007dfb496cca67e13b > password.raw.md5
@@ -167,4 +169,4 @@ uid=1002(robot) gid=1002(robot) euid=0(root) groups=0(root),1002(robot)
 
 This means that now we can do everything in the system, and our work here is done.
 
-![]({{ site.url }}/public/posts/mrrobot/groot-dance.gif)
+![(g)root dance!]({{ site.url }}/public/posts/mrrobot/groot-dance.gif "(g)root dance!")
