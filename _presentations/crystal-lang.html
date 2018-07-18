@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<title>Crystal language: fast CLI apps with Rubyesque syntax</title>
+<meta name="author" content="(Daniel Luna (Senior Software Engineer))"/>
+<style type="text/css">
+.underline { text-decoration: underline; }
+</style>
+<link rel="stylesheet" href="http://cdn.jsdelivr.net/reveal.js/3.0.0/css/reveal.css"/>
+
+<link rel="stylesheet" href="http://cdn.jsdelivr.net/reveal.js/3.0.0/css/theme/night.css" id="theme"/>
+
+
+<!-- If the query includes 'print-pdf', include the PDF print sheet -->
+<script>
+    if( window.location.search.match( /print-pdf/gi ) ) {
+        var link = document.createElement( 'link' );
+        link.rel = 'stylesheet';
+        link.type = 'text/css';
+        link.href = 'http://cdn.jsdelivr.net/reveal.js/3.0.0/css/print/pdf.css';
+        document.getElementsByTagName( 'head' )[0].appendChild( link );
+    }
+</script>
+</head>
+<body>
+<div class="reveal">
+<div class="slides">
+<section id="sec-title-slide"><h1 class="title">Crystal language: fast CLI apps with Rubyesque syntax</h1>
+</section>
+<section>
+<section id="slide-org2ce3e28">
+<h2 id="org2ce3e28">Why Crystal?</h2>
+<ul class="fragment roll-in">
+<li>Ruby</li>
+<li>Statically typed</li>
+<li>Type inference</li>
+<li>Null-reference checks</li>
+<li>"Fast as C, slick as Ruby"</li>
+<li>Channel-style concurrency</li>
+<li>(Lisp-style) <a href="https://crystal-lang.org/docs/syntax_and_semantics/macros.html">Macros</a>!</li>
+
+</ul>
+
+</section>
+</section>
+<section>
+<section id="slide-org88a92e8">
+<h2 id="org88a92e8">Cool, now why should I care?</h2>
+<p>
+Even though we mostly write web applications these days, every once in a while
+you need to write, say, a CLI app. Sometimes these have requirements that go
+beyond a glorified shell script (read: gotta be fast), in which case here are
+your alternatives:
+</p>
+
+<ul class="fragment roll-in">
+<li><p>
+C
+</p>
+
+<div class="figure">
+<p><img src="img-crystal-lang/8ortgw167hhz_2018-07-17_21-30-55.png" alt="8ortgw167hhz_2018-07-17_21-30-55.png" />
+</p>
+</div></li>
+
+</ul>
+
+</section>
+<section >
+<ul>
+<li><p>
+C++
+</p>
+
+<p>
+Same as above, but added templates and custom syntax.
+</p>
+
+
+<div class="figure">
+<p><img src="img-crystal-lang/f0f093223cd931deb48b2f29fe610c17_2018-07-17_21-36-40.png" alt="f0f093223cd931deb48b2f29fe610c17_2018-07-17_21-36-40.png" />
+</p>
+</div></li>
+
+</ul>
+
+</section>
+<section >
+<ul>
+<li><p>
+Golang
+</p>
+
+
+<div class="figure">
+<p><img src="img-crystal-lang/qGxliQk3J5iaw-vTQeqM9CCj2O94TT-_-3LyWqg24TY_2018-07-17_22-21-17.png" alt="qGxliQk3J5iaw-vTQeqM9CCj2O94TT-_-3LyWqg24TY_2018-07-17_22-21-17.png" />
+</p>
+</div></li>
+
+</ul>
+
+</section>
+<section >
+<ul>
+<li><p>
+Rust
+</p>
+
+</section>
+<section >
+
+<div class="figure">
+<p><img src="img-crystal-lang/PPrust_2018-07-17_22-32-07.png" alt="PPrust_2018-07-17_22-32-07.png" height="500px" width="auto" />
+</p>
+</div>
+
+<p class="fragment roll-in">
+the joke is lighter because the author actually likes Rust ;)
+</p></li>
+
+</ul>
+
+</section>
+</section>
+<section>
+<section id="slide-orgd545355">
+<h2 id="orgd545355">What about web development?</h2>
+<p>
+Crystal has at least two mature Rails-style web frameworks:
+</p>
+
+</section>
+<section >
+<ul>
+<li><p>
+<a href="https://amberframework.org/">Amber</a>
+</p>
+
+<blockquote nil>
+<p>
+Amber is a web application framework written in Crystal inspired by Kemal,
+Rails, Phoenix and other popular application frameworks.
+</p>
+
+<p>
+The purpose of Amber is not to create yet another framework, but to take
+advantage of the beautiful Crystal language capabilities and provide
+engineers and the Crystal community with an efficient, cohesive, well
+maintained web framework that embraces the language philosophies,
+conventions, and guidelines.
+</p>
+
+<p>
+Amber borrows concepts that have already been battle tested and successful,
+and embraces new concepts through team and community collaboration and
+analysis, which also aligns with Crystal's philosophy.
+</p>
+</blockquote>
+
+<p>
+<a href="https://crystal-lang.org/2018/01/25/amber-crystalizing-rails-and-phoenix.html">This article</a> features some amazing benchmarks.
+</p></li>
+
+</ul>
+
+</section>
+<section >
+<ul>
+<li><p>
+<a href="https://luckyframework.org/">Lucky</a>
+</p>
+
+<blockquote nil>
+<p>
+Type safe database queries, rock solid routing, type safe forms and
+validations, and more. This is how Lucky helps you find errors before they
+reach your customers, write fewer tests, and spend less time fixing
+embarrassing bugs.
+</p>
+</blockquote></li>
+
+</ul>
+
+</section>
+<section >
+<p>
+Both make use of Crystal's type safety to prevent bugs, and follow the
+conventions (i.e. Rails) we already know and love.
+</p>
+
+<p class="fragment roll-in">
+While researching for this, I found this article, "<a href="https://dev.to/jwoertink/my-journey-in-to-crystal-from-ruby-3bmm" class="fragment roll-in">My journey in to Crystal
+from Ruby</a>", with a candid portrait of a (good) Rails to Lucky migration.
+</p>
+
+</section>
+</section>
+<section>
+<section id="slide-org26d0eb7">
+<h2 id="org26d0eb7">Examples</h2>
+<div class="outline-text-2" id="text-org26d0eb7">
+</div>
+</section>
+</section>
+<section>
+<section id="slide-org1737037">
+<h3 id="org1737037">Type system</h3>
+<div class="org-src-container">
+
+<pre  class="src src-crystal"><span style="color: #b089d2817f6b;">def</span> <span style="color: #cc9bcb947448;">shout</span><span style="color: #51afef;">(</span><span style="color: #ffffaf378cb4;">x</span><span style="color: #51afef;">)</span>
+  <span style="color: #5B6268;"># </span><span style="color: #5B6268;">Notice that both Int32 and String respond_to `to_s`</span>
+  <span style="color: #ffffaf378cb4;">x</span>.<span style="color: #4b86dd2dc139;">to_s</span>.<span style="color: #579adcc6b9be;">upcase</span>
+<span style="color: #f23cb0abfaaf;">end</span>
+
+<span style="color: #0ec8dd88da94;">foo</span> = <span style="color: #ECBE7B;">ENV</span><span style="color: #51afef;">[</span><span style="color: #98be65;">"FOO"</span><span style="color: #51afef;">]</span>? || <span style="color: #da8548; font-weight: bold;">10</span>
+
+<span style="color: #d5cbb951ffff;">typeof</span><span style="color: #51afef;">(</span><span style="color: #0ec8dd88da94;">foo</span><span style="color: #51afef;">)</span> <span style="color: #5B6268;"># </span><span style="color: #5B6268;">=&gt; (Int32 | String)</span>
+<span style="color: #d5cbb951ffff;">typeof</span><span style="color: #51afef;">(</span><span style="color: #cc9bcb947448;">shout</span><span style="color: #c678dd;">(</span><span style="color: #0ec8dd88da94;">foo</span><span style="color: #c678dd;">)</span><span style="color: #51afef;">)</span> <span style="color: #5B6268;"># </span><span style="color: #5B6268;">=&gt; String</span>
+</pre>
+</div>
+
+</section>
+</section>
+<section>
+<section id="slide-orga488f6f">
+<h3 id="orga488f6f">Null checks</h3>
+<div class="org-src-container">
+
+<pre  class="src src-crystal"><span style="color: #0000d8ceffff;">if</span> <span style="color: #c678dd;">rand</span><span style="color: #51afef;">(</span><span style="color: #da8548; font-weight: bold;">2</span><span style="color: #51afef;">)</span> &gt; <span style="color: #da8548; font-weight: bold;">0</span>
+  <span style="color: #6b72dbb4ac7a;">my_string</span> = <span style="color: #98be65;">"hello world"</span>
+<span style="color: #f23cb0abfaaf;">end</span>
+
+<span style="color: #c678dd;">puts</span> <span style="color: #6b72dbb4ac7a;">my_string</span>.<span style="color: #579adcc6b9be;">upcase</span>
+</pre>
+</div>
+
+</section>
+<section >
+
+<p>
+When the above example is compiled, it returns a type error:
+</p>
+
+<div class="org-src-container">
+
+<pre  class="src src-sh"><span style="color: #85afd9569a30;">crystal</span> <span style="color: #dc42c6b371d0;">/tmp/nullcheck.cr</span>
+</pre>
+</div>
+
+<p>
+Error in /tmp/nullcheck.cr:5: undefined method 'upcase' for Nil (compile-time type is (String | Nil))
+</p>
+
+<p>
+puts my_string.upcase
+               ^~~~~~
+</p>
+
+</section>
+</section>
+<section>
+<section id="slide-org51ade2c">
+<h3 id="org51ade2c">HTTP server</h3>
+<p>
+HTTP server from <a href="https://crystal-lang.org/docs/overview/http_server.html">the book</a>:
+</p>
+
+<div class="org-src-container">
+
+<pre  class="src src-crystal"><span style="color: #c678dd;">require</span> <span style="color: #98be65;">"http/server"</span>
+
+<span style="color: #ffffa5a5c0bf;">server</span> = <span style="color: #ECBE7B;">HTTP</span>::<span style="color: #ECBE7B;">Server</span>.<span style="color: #ffffa5b3c507;">new</span> <span style="color: #ffffa84da4bc;">do</span> |<span style="color: #efd4b170fc8f;">context</span>|
+  <span style="color: #efd4b170fc8f;">context</span>.<span style="color: #f1fdb0bffae1;">response</span>.<span style="color: #dccac68571c9;">content_type</span> = <span style="color: #98be65;">"text/plain"</span>
+  <span style="color: #efd4b170fc8f;">context</span>.<span style="color: #f1fdb0bffae1;">response</span>.<span style="color: #ffffad3f9207;">print</span> <span style="color: #98be65;">"Hello world! The time is </span><span style="color: #dcaeea;">#{</span><span style="color: #49aed3eeffff;">Time</span><span style="color: #dcaeea;">.</span><span style="color: #9148d7e19247;">now</span><span style="color: #dcaeea;">}</span><span style="color: #98be65;">"</span>
+<span style="color: #f23cb0abfaaf;">end</span>
+
+<span style="color: #33eedd8dcdeb;">address</span> = <span style="color: #ffffa5a5c0bf;">server</span>.<span style="color: #b0c6d2747f4c;">bind_tcp</span> <span style="color: #da8548; font-weight: bold;">8080</span>
+<span style="color: #c678dd;">puts</span> <span style="color: #98be65;">"Listening on http://</span><span style="color: #dcaeea;">#{</span><span style="color: #33eedd8dcdeb;">address</span><span style="color: #dcaeea;">}</span><span style="color: #98be65;">"</span>
+<span style="color: #ffffa5a5c0bf;">server</span>.<span style="color: #a9a5c478ffff;">listen</span>
+</pre>
+</div>
+
+<p class="fragment roll-in">
+"But isn't this just plain Ruby?", those of you who know it may ask. Thanks to
+Crystal's awesome type inference, we're able to write type-safe code without
+all the extra type-ing.
+</p>
+
+</section>
+</section>
+<section>
+<section id="slide-org026da62">
+<h3 id="org026da62">Concurrency</h3>
+<p>
+From the Crystal documentation <a href="https://crystal-lang.org/docs/guides/concurrency.html">on concurrency</a>:
+</p>
+
+<blockquote nil>
+<p>
+A Crystal program executes in a single operating system thread, except the
+Garbage Collector (GC) which implements a concurrent mark-and-sweep
+(currently Boehm GC).
+</p>
+</blockquote>
+
+<p>
+(I <span class="underline">think</span> that's where we are with MRI. Anyone knows anything about
+parallelism in JRuby?)
+</p>
+
+</section>
+<section >
+<p>
+Crystal has <a href="https://en.wikipedia.org/wiki/Communicating_sequential_processes">CSP</a>-inspired concurrency, as the following example shows:
+</p>
+
+<div class="org-src-container">
+
+<pre  class="src src-crystal"><span style="color: #7613dae4a516;">channel</span> = <span style="color: #b87ec107ffff;">Channel</span><span style="color: #51afef;">(</span><span style="color: #ECBE7B;">Int32</span><span style="color: #51afef;">)</span>.<span style="color: #ffffa5b3c507;">new</span>
+<span style="color: #f4d5bd3975b3;">total_lines</span> = <span style="color: #da8548; font-weight: bold;">0</span>
+<span style="color: #79bdcd95ffff;">files</span> = <span style="color: #ECBE7B;">Dir</span>.<span style="color: #f0f9bee27451;">glob</span><span style="color: #51afef;">(</span><span style="color: #98be65;">"*.txt"</span><span style="color: #51afef;">)</span>
+
+<span style="color: #79bdcd95ffff;">files</span>.<span style="color: #90b1d7f692ac;">each</span> <span style="color: #ffffa84da4bc;">do</span> |<span style="color: #ffffaa34e684;">f</span>|
+  <span style="color: #c678dd;">spawn</span> <span style="color: #ffffa84da4bc;">do</span>
+    <span style="color: #989bd6d28d77;">lines</span> = <span style="color: #ECBE7B;">File</span>.<span style="color: #f6c2af33f6e2;">read</span><span style="color: #51afef;">(</span><span style="color: #ffffaa34e684;">f</span><span style="color: #51afef;">)</span>.<span style="color: #989bd6d28d77;">lines</span>.<span style="color: #e5bab49affff;">size</span>
+    <span style="color: #7613dae4a516;">channel</span>.<span style="color: #ffffa5c4bae4;">send</span> <span style="color: #989bd6d28d77;">lines</span>
+  <span style="color: #f23cb0abfaaf;">end</span>
+<span style="color: #f23cb0abfaaf;">end</span>
+
+<span style="color: #79bdcd95ffff;">files</span>.<span style="color: #e5bab49affff;">size</span>.<span style="color: #9c5bd63b8b13;">times</span> <span style="color: #ffffa84da4bc;">do</span>
+  <span style="color: #f4d5bd3975b3;">total_lines</span> += <span style="color: #7613dae4a516;">channel</span>.<span style="color: #b598c1b9ffff;">receive</span>
+<span style="color: #f23cb0abfaaf;">end</span>
+
+<span style="color: #c678dd;">puts</span> <span style="color: #f4d5bd3975b3;">total_lines</span>
+</pre>
+</div>
+
+</section>
+</section>
+<section>
+<section id="slide-org01a63e3">
+<h3 id="org01a63e3">Testing</h3>
+<blockquote nil>
+<p>
+Crystal comes with a fully-featured spec library in the Spec module. It provides
+a structure for writing executable examples of how your code should behave.
+</p>
+
+<p>
+Inspired by Rspec, it includes a domain specific language (DSL) that allows you
+to write examples in a way similar to plain english.
+</p>
+</blockquote>
+
+</section>
+<section >
+<div class="org-src-container">
+
+<pre  class="src src-crystal"><span style="color: #c678dd;">require</span> <span style="color: #98be65;">"spec"</span>
+
+<span style="color: #f235b0acfab4;">describe</span> <span style="color: #ECBE7B;">Array</span> <span style="color: #ffffa84da4bc;">do</span>
+  <span style="color: #f235b0acfab4;">describe</span> <span style="color: #98be65;">"#size"</span> <span style="color: #ffffa84da4bc;">do</span>
+    <span style="color: #ffffa5a9c335;">it</span> <span style="color: #98be65;">"correctly reports the number of elements in the Array"</span> <span style="color: #ffffa84da4bc;">do</span>
+      <span style="color: #51afef;">[</span><span style="color: #da8548; font-weight: bold;">1</span>, <span style="color: #da8548; font-weight: bold;">2</span>, <span style="color: #da8548; font-weight: bold;">3</span><span style="color: #51afef;">]</span>.<span style="color: #e5bab49affff;">size</span>.<span style="color: #ffffa890df0b;">should</span> <span style="color: #0000dd78dd77;">eq</span> <span style="color: #da8548; font-weight: bold;">3</span>
+    <span style="color: #f23cb0abfaaf;">end</span>
+  <span style="color: #f23cb0abfaaf;">end</span>
+
+  <span style="color: #f235b0acfab4;">describe</span> <span style="color: #98be65;">"#empty?"</span> <span style="color: #ffffa84da4bc;">do</span>
+    <span style="color: #ffffa5a9c335;">it</span> <span style="color: #98be65;">"is true when no elements are in the array"</span> <span style="color: #ffffa84da4bc;">do</span>
+      <span style="color: #51afef;">(</span><span style="color: #c678dd;">[]</span> <span style="color: #ffffa61fb4e8;">of</span> <span style="color: #ECBE7B;">Int32</span><span style="color: #51afef;">)</span>.<span style="color: #46e2dd4ac3f1;">empty?</span>.<span style="color: #ffffa890df0b;">should</span> <span style="color: #515ddd01bdad;">be_true</span>
+    <span style="color: #f23cb0abfaaf;">end</span>
+
+    <span style="color: #ffffa5a9c335;">it</span> <span style="color: #98be65;">"is false if there are elements in the array"</span> <span style="color: #ffffa84da4bc;">do</span>
+      <span style="color: #51afef;">[</span><span style="color: #da8548; font-weight: bold;">1</span><span style="color: #51afef;">]</span>.<span style="color: #46e2dd4ac3f1;">empty?</span>.<span style="color: #ffffa890df0b;">should</span> <span style="color: #ffffa644b337;">be_false</span>
+    <span style="color: #f23cb0abfaaf;">end</span>
+  <span style="color: #f23cb0abfaaf;">end</span>
+<span style="color: #f23cb0abfaaf;">end</span>
+</pre>
+</div>
+
+</section>
+</section>
+<section>
+<section id="slide-orgb5d4c48">
+<h3 id="orgb5d4c48">Macros</h3>
+<div class="org-src-container">
+
+<pre  class="src src-crystal"><span style="color: #ffffb25185a5;">macro</span> <span style="color: #c678dd;">define_method</span><span style="color: #51afef;">(</span><span style="color: #e05fb63affff;">name</span>, <span style="color: #3779d5a1ffff;">content</span><span style="color: #51afef;">)</span>
+  <span style="color: #b089d2817f6b;">def</span> <span style="color: #51afef; font-weight: bold;">{</span><span style="color: #c678dd; font-weight: bold;">{</span><span style="color: #e05fb63affff;">name</span>.<span style="color: #f1cab0cffb09;">id</span><span style="color: #c678dd; font-weight: bold;">}</span><span style="color: #51afef; font-weight: bold;">}</span>
+    <span style="color: #51afef; font-weight: bold;">{</span><span style="color: #c678dd; font-weight: bold;">{</span><span style="color: #3779d5a1ffff;">content</span><span style="color: #c678dd; font-weight: bold;">}</span><span style="color: #51afef; font-weight: bold;">}</span>
+  <span style="color: #f23cb0abfaaf;">end</span>
+<span style="color: #f23cb0abfaaf;">end</span>
+</pre>
+</div>
+
+<p class="fragment roll-in">
+You can invoke a fixed subset of methods on AST nodes at compile-time. These
+methods are documented in a fictitious Crystal::Macros module.
+</p>
+
+</section>
+</section>
+<section>
+<section id="slide-org2cdd502">
+<h2 id="org2cdd502">Development / editor integration</h2>
+<p>
+<a href="http://developerexperience.org/">DX</a> is important too, and to make our developer lives easier, there are some
+awesome tools for that:
+</p>
+
+<ul class="fragment roll-in">
+<li><a href="https://github.com/crystal-community/icr">icr</a> for interactive development</li>
+<li><a href="https://github.com/veelenga/ameba">ameba</a> for linting</li>
+<li><a href="https://github.com/crystal-lang/shards">shards</a> for dependency management (bundler equivalent)</li>
+<li><a href="https://github.com/pine/crenv">crenv</a> for managing different Crystal versions (rbenv equivalent)</li>
+<li><a href="https://github.com/crystal-lang-tools/scry">scry</a>, an LSP server for crystal</li>
+
+</ul>
+
+</section>
+</section>
+<section>
+<section id="slide-org2dacdc5">
+<h2 id="org2dacdc5">Use cases for Crystal</h2>
+<p>
+Some interesting comments from <a href="https://dev.to/crystal-lang/we-created-the-crystal-language-ask-us-anything/comments/lol">this AMA</a> with the language authors:
+</p>
+
+<blockquote nil>
+<p>
+I've been using Crystal for microservices/REST APIs in the last two months. It
+actually fits pretty well with those kinds of applications. The code ended up
+smaller and more well structured than the Node.js version, and it actually runs
+2x-5x faster, depending on the endpoint complexity.
+</p>
+
+
+<p>
+AFAIK there are also some folks working on more complex stuff such as
+machine-learning and game engines using Crystal, so its probably a good
+contender for those tasks too.
+</p>
+</blockquote>
+
+</section>
+<section >
+<blockquote nil>
+<p>
+Compilers and command line tools are for sure good fits. But we have also create
+bots (slack / twilio / telegram), some other microservices and small web apps
+with some UI.
+</p>
+
+<p>
+Depending on your interest crystal could be good enough for game dev, using c
+libs in a more friendly way, and data science.
+</p>
+</blockquote>
+
+</section>
+</section>
+<section>
+<section id="slide-org9565ab0">
+<h2 id="org9565ab0">Questions?</h2>
+</section>
+</section>
+</div>
+</div>
+<script src="http://cdn.jsdelivr.net/reveal.js/3.0.0/lib/js/head.min.js"></script>
+<script src="http://cdn.jsdelivr.net/reveal.js/3.0.0/js/reveal.js"></script>
+
+<script>
+// Full list of configuration options available here:
+// https://github.com/hakimel/reveal.js#configuration
+Reveal.initialize({
+
+controls: true,
+progress: true,
+history: true,
+center: true,
+slideNumber: 'c',
+rollingLinks: true,
+keyboard: true,
+overview: true,
+width: 1200,
+height: 800,
+margin: 0.00,
+minScale: 0.10,
+maxScale: 1.00,
+
+theme: Reveal.getQueryHash().theme, // available themes are in /css/theme
+transition: Reveal.getQueryHash().transition || 'none', // default/cube/page/concave/zoom/linear/fade/none
+transitionSpeed: 'default',
+multiplex: {
+    secret: '', // null if client
+    id: '', // id, obtained from socket.io server
+    url: '' // Location of socket.io server
+},
+
+// Optional libraries used to extend on reveal.js
+dependencies: [
+ { src: 'http://cdn.jsdelivr.net/reveal.js/3.0.0/lib/js/classList.js', condition: function() { return !document.body.classList; } },
+ { src: 'http://cdn.jsdelivr.net/reveal.js/3.0.0/plugin/markdown/marked.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+ { src: 'http://cdn.jsdelivr.net/reveal.js/3.0.0/plugin/markdown/markdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+ { src: 'http://cdn.jsdelivr.net/reveal.js/3.0.0/plugin/zoom-js/zoom.js', async: true, condition: function() { return !!document.body.classList; } },
+ { src: 'http://cdn.jsdelivr.net/reveal.js/3.0.0/plugin/notes/notes.js', async: true, condition: function() { return !!document.body.classList; } }]
+});
+</script>
+</body>
+</html>

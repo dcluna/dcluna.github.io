@@ -1,0 +1,290 @@
+# -*- mode: Org; org-download-image-dir: "./img-crystal-lang"; -*-
+#+OPTIONS: reveal_center:t reveal_progress:t reveal_history:t reveal_control:t
+#+OPTIONS: reveal_mathjax:t reveal_rolling_links:t reveal_keyboard:t reveal_overview:t num:nil
+#+OPTIONS: reveal_width:1200 reveal_height:800
+#+OPTIONS: toc:nil timestamp:nil author:nil ^:nil
+#+REVEAL_MARGIN: 0.0
+#+REVEAL_MIN_SCALE: 0.1
+#+REVEAL_MAX_SCALE: 1.0
+#+REVEAL_TRANS: none
+#+REVEAL_THEME: night
+#+REVEAL_HLEVEL: 2
+#+REVEAL_DEFAULT_FRAG_STYLE: roll-in
+#+REVEAL_ROOT: http://cdn.jsdelivr.net/reveal.js/3.0.0/
+
+#+TITLE: Crystal language: fast CLI apps with Rubyesque syntax
+* Why Crystal?
+
+  #+ATTR_REVEAL: :frag t
+   - Ruby
+   - Statically typed
+   - Type inference
+   - Null-reference checks
+   - "Fast as C, slick as Ruby"
+   - Channel-style concurrency
+   - (Lisp-style) [[https://crystal-lang.org/docs/syntax_and_semantics/macros.html][Macros]]!
+
+* Cool, now why should I care?
+
+  Even though we mostly write web applications these days, every once in a while
+  you need to write, say, a CLI app. Sometimes these have requirements that go
+  beyond a glorified shell script (read: gotta be fast), in which case here are
+  your alternatives:
+
+  #+ATTR_REVEAL: :frag t
+  - C
+    #+DOWNLOADED: https://i.redd.it/8ortgw167hhz.png @ 2018-07-17 21:30:55
+    [[file:img-crystal-lang/8ortgw167hhz_2018-07-17_21-30-55.png]]
+
+  #+REVEAL: split
+  - C++
+
+    Same as above, but added templates and custom syntax.
+
+    #+DOWNLOADED: https://i.pinimg.com/originals/f0/f0/93/f0f093223cd931deb48b2f29fe610c17.png @ 2018-07-17 21:36:40
+    [[file:img-crystal-lang/f0f093223cd931deb48b2f29fe610c17_2018-07-17_21-36-40.png]]
+
+  #+REVEAL: split
+  - Golang
+
+    #+DOWNLOADED: https://i.redditmedia.com/qGxliQk3J5iaw-vTQeqM9CCj2O94TT-_-3LyWqg24TY.png?w=722&s=607f1204dcee670a51950f52735df862 @ 2018-07-17 22:21:17
+    [[file:img-crystal-lang/qGxliQk3J5iaw-vTQeqM9CCj2O94TT-_-3LyWqg24TY_2018-07-17_22-21-17.png]]
+
+  #+REVEAL: split
+  - Rust
+
+    #+REVEAL: split
+    #+DOWNLOADED: http://leftoversalad.com/c/015_programmingpeople/PPrust.png @ 2018-07-17 22:32:07
+    #+attr_html: :height 500px :width auto
+    [[file:img-crystal-lang/PPrust_2018-07-17_22-32-07.png]]
+
+    #+ATTR_REVEAL: :frag t
+    the joke is lighter because the author actually likes Rust ;)
+
+* What about web development?
+
+  Crystal has at least two mature Rails-style web frameworks:
+
+  #+REVEAL: split
+  - [[https://amberframework.org/][Amber]]
+
+    #+BEGIN_QUOTE
+    Amber is a web application framework written in Crystal inspired by Kemal,
+    Rails, Phoenix and other popular application frameworks.
+
+    The purpose of Amber is not to create yet another framework, but to take
+    advantage of the beautiful Crystal language capabilities and provide
+    engineers and the Crystal community with an efficient, cohesive, well
+    maintained web framework that embraces the language philosophies,
+    conventions, and guidelines.
+
+    Amber borrows concepts that have already been battle tested and successful,
+    and embraces new concepts through team and community collaboration and
+    analysis, which also aligns with Crystal's philosophy.
+    #+END_QUOTE
+
+    [[https://crystal-lang.org/2018/01/25/amber-crystalizing-rails-and-phoenix.html][This article]] features some amazing benchmarks.
+
+  #+REVEAL: split
+  - [[https://luckyframework.org/][Lucky]]
+
+    #+BEGIN_QUOTE
+    Type safe database queries, rock solid routing, type safe forms and
+    validations, and more. This is how Lucky helps you find errors before they
+    reach your customers, write fewer tests, and spend less time fixing
+    embarrassing bugs.
+    #+END_QUOTE
+
+  #+REVEAL: split
+  Both make use of Crystal's type safety to prevent bugs, and follow the
+  conventions (i.e. Rails) we already know and love.
+
+  #+ATTR_REVEAL: :frag t
+  While researching for this, I found this article, "[[https://dev.to/jwoertink/my-journey-in-to-crystal-from-ruby-3bmm][My journey in to Crystal
+  from Ruby]]", with a candid portrait of a (good) Rails to Lucky migration.
+
+* Examples
+** Type system
+
+   #+BEGIN_SRC crystal
+def shout(x)
+  # Notice that both Int32 and String respond_to `to_s`
+  x.to_s.upcase
+end
+
+foo = ENV["FOO"]? || 10
+
+typeof(foo) # => (Int32 | String)
+typeof(shout(foo)) # => String
+   #+END_SRC
+
+** Null checks
+
+   #+BEGIN_SRC crystal :tangle /tmp/nullcheck.cr
+if rand(2) > 0
+  my_string = "hello world"
+end
+
+puts my_string.upcase
+   #+END_SRC
+
+   #+REVEAL: split
+
+   When the above example is compiled, it returns a type error:
+
+   #+BEGIN_SRC sh :session compilecr :results raw drawer :exports both :eval no-export
+   crystal /tmp/nullcheck.cr
+   #+END_SRC
+
+   #+ATTR_REVEAL: :frag t
+
+   #+RESULTS:
+   :RESULTS:
+   Error in /tmp/nullcheck.cr:5: undefined method 'upcase' for Nil (compile-time type is (String | Nil))
+
+   puts my_string.upcase
+                  ^~~~~~
+   :END:
+
+** HTTP server
+   HTTP server from [[https://crystal-lang.org/docs/overview/http_server.html][the book]]:
+
+   #+BEGIN_SRC crystal
+     require "http/server"
+
+     server = HTTP::Server.new do |context|
+       context.response.content_type = "text/plain"
+       context.response.print "Hello world! The time is #{Time.now}"
+     end
+
+     address = server.bind_tcp 8080
+     puts "Listening on http://#{address}"
+     server.listen
+   #+END_SRC
+
+   #+ATTR_REVEAL: :frag t
+   "But isn't this just plain Ruby?", those of you who know it may ask. Thanks to
+   Crystal's awesome type inference, we're able to write type-safe code without
+   all the extra type-ing.
+
+** Concurrency
+
+   From the Crystal documentation [[https://crystal-lang.org/docs/guides/concurrency.html][on concurrency]]:
+
+   #+BEGIN_QUOTE
+   A Crystal program executes in a single operating system thread, except the
+   Garbage Collector (GC) which implements a concurrent mark-and-sweep
+   (currently Boehm GC).
+   #+END_QUOTE
+
+   (I _think_ that's where we are with MRI. Anyone knows anything about
+   parallelism in JRuby?)
+
+   #+REVEAL: split
+   Crystal has [[https://en.wikipedia.org/wiki/Communicating_sequential_processes][CSP]]-inspired concurrency, as the following example shows:
+
+   #+BEGIN_SRC crystal
+channel = Channel(Int32).new
+total_lines = 0
+files = Dir.glob("*.txt")
+
+files.each do |f|
+  spawn do
+    lines = File.read(f).lines.size
+    channel.send lines
+  end
+end
+
+files.size.times do
+  total_lines += channel.receive
+end
+
+puts total_lines
+   #+END_SRC
+
+** Testing
+
+   #+BEGIN_QUOTE
+Crystal comes with a fully-featured spec library in the Spec module. It provides
+a structure for writing executable examples of how your code should behave.
+
+Inspired by Rspec, it includes a domain specific language (DSL) that allows you
+to write examples in a way similar to plain english.
+   #+END_QUOTE
+
+   #+REVEAL: split
+   #+BEGIN_SRC crystal
+require "spec"
+
+describe Array do
+  describe "#size" do
+    it "correctly reports the number of elements in the Array" do
+      [1, 2, 3].size.should eq 3
+    end
+  end
+
+  describe "#empty?" do
+    it "is true when no elements are in the array" do
+      ([] of Int32).empty?.should be_true
+    end
+
+    it "is false if there are elements in the array" do
+      [1].empty?.should be_false
+    end
+  end
+end
+   #+END_SRC
+
+** Macros
+
+   #+BEGIN_SRC crystal
+macro define_method(name, content)
+  def {{name.id}}
+    {{content}}
+  end
+end
+   #+END_SRC
+
+   #+ATTR_REVEAL: :frag t
+   You can invoke a fixed subset of methods on AST nodes at compile-time. These
+   methods are documented in a fictitious Crystal::Macros module.
+
+* Development / editor integration
+
+  [[http://developerexperience.org/][DX]] is important too, and to make our developer lives easier, there are some
+  awesome tools for that:
+
+  #+ATTR_REVEAL: :frag t
+   - [[https://github.com/crystal-community/icr][icr]] for interactive development
+   - [[https://github.com/veelenga/ameba][ameba]] for linting
+   - [[https://github.com/crystal-lang/shards][shards]] for dependency management (bundler equivalent)
+   - [[https://github.com/pine/crenv][crenv]] for managing different Crystal versions (rbenv equivalent)
+   - [[https://github.com/crystal-lang-tools/scry][scry]], an LSP server for crystal
+
+* Use cases for Crystal
+
+  Some interesting comments from [[https://dev.to/crystal-lang/we-created-the-crystal-language-ask-us-anything/comments/lol][this AMA]] with the language authors:
+
+  #+BEGIN_QUOTE
+I've been using Crystal for microservices/REST APIs in the last two months. It
+actually fits pretty well with those kinds of applications. The code ended up
+smaller and more well structured than the Node.js version, and it actually runs
+2x-5x faster, depending on the endpoint complexity.
+
+
+AFAIK there are also some folks working on more complex stuff such as
+machine-learning and game engines using Crystal, so its probably a good
+contender for those tasks too.
+  #+END_QUOTE
+
+  #+REVEAL: split
+  #+BEGIN_QUOTE
+Compilers and command line tools are for sure good fits. But we have also create
+bots (slack / twilio / telegram), some other microservices and small web apps
+with some UI.
+
+Depending on your interest crystal could be good enough for game dev, using c
+libs in a more friendly way, and data science.
+  #+END_QUOTE
+
+* Questions?

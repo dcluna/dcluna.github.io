@@ -18,3 +18,7 @@ title: Presentations
 # [Ruby Hyperloop]({{ site.url }}/presentations/ruby-hyperloop.html) #
 
 [Presentation]({{ site.url }}/presentations/ruby-hyperloop.html) about Ruby-Hyperloop, the isomorphic Ruby web framework.
+
+# [Crystal language]({{ site.url }}/presentations/crystal-lang.html) #
+
+[Presentation]({{ site.url }}/presentations/crystal-lang.html) about the Crystal language
