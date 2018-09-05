@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<title>Code generation strategies in Rails</title>
+<meta name="author" content="(Daniel Luna (Senior Software Engineer))"/>
+<style type="text/css">
+.underline { text-decoration: underline; }
+</style>
+<link rel="stylesheet" href="http://cdn.jsdelivr.net/reveal.js/3.0.0/css/reveal.css"/>
+
+<link rel="stylesheet" href="http://cdn.jsdelivr.net/reveal.js/3.0.0/css/theme/night.css" id="theme"/>
+
+
+<!-- If the query includes 'print-pdf', include the PDF print sheet -->
+<script>
+    if( window.location.search.match( /print-pdf/gi ) ) {
+        var link = document.createElement( 'link' );
+        link.rel = 'stylesheet';
+        link.type = 'text/css';
+        link.href = 'http://cdn.jsdelivr.net/reveal.js/3.0.0/css/print/pdf.css';
+        document.getElementsByTagName( 'head' )[0].appendChild( link );
+    }
+</script>
+</head>
+<body>
+<div class="reveal">
+<div class="slides">
+<section id="sec-title-slide"><h1 class="title">Code generation strategies in Rails</h1>
+</section>
+
+<section>
+<section id="slide-org8b69698">
+<h2 id="org8b69698">Overview</h2>
+<blockquote nil>
+<p>
+"I'd rather write programs to write programs than write programs"
+</p>
+<ul>
+<li>Dick Sites</li>
+
+</ul>
+</blockquote>
+<p>
+<sup><a id="fnr.1" class="footref" href="#fn.1">1</a></sup>
+</p>
+
+<p>
+This comes from a <a href="https://sites.google.com/site/dicksites/">compiler writer</a>, one of the wise elders of our profession,
+but it applies even to more mundane activities such as designing a web page.
+Which can be seen as a sort of code-generation machine on its own, since we're
+usually doing quite a bit of logic to output the right HTML/JS/CSS.
+</p>
+
+</section>
+</section>
+<section>
+<section id="slide-orge07c2bd">
+<h2 id="orge07c2bd">Copy and paste</h2>
+
+<div class="figure">
+<p><img src="img-codegen/6875349654_a0d8e35bb1_2018-09-04_23-03-52.jpg" alt="6875349654_a0d8e35bb1_2018-09-04_23-03-52.jpg" />
+</p>
+</div>
+
+</section>
+<section >
+<blockquote nil>
+<p>
+Human beings are notoriously bad at sweating the details.
+</p>
+
+<p>
+Accordingly, any kind of hand-hacking of programs is a rich source of delays and errors.
+</p>
+
+<p>
+The simpler and more abstracted your program specification can be, the more likely it is that the human designer will have gotten it right.
+</p>
+
+<p>
+Generated code (at every level) is almost always cheaper and more reliable than hand-hacked.
+</p>
+
+<p>
+We all know this is true (it's why we have compilers and interpreters, after
+all) but we often don't think about the implications.
+</p>
+</blockquote>
+
+</section>
+<section >
+<blockquote nil>
+<p>
+High-level-language code that's repetitive and mind-numbing for humans to
+write is just as productive a target for a code generator as machine code.
+</p>
+
+<p>
+It pays to use code generators when they can raise the level of abstraction -
+that is, when the specification language for the generator is simpler than the
+generated code, and the code doesn't have to be hand-hacked afterwards.
+</p>
+
+<ul>
+<li>The Art of Unix Programming</li>
+
+</ul>
+</blockquote>
+<p>
+<sup><a id="fnr.2" class="footref" href="#fn.2">2</a></sup>
+</p>
+
+<p>
+This quote was from a book written in 2003, funny how the world hasn't changed
+a lot, has it?
+</p>
+
+</section>
+</section>
+<section>
+<section id="slide-org529a0ea">
+<h2 id="org529a0ea">Code snippets</h2>
+<iframe width="560" height="315" src="https://www.youtube.com/embed/1W66B3CHaUo" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+
+<p>
+This is not <span class="underline">that</span> different from the copy-paste technique, it only automates
+away the find-and-replace part. Still, this small abstraction over the
+changing part is already a gamechanger.
+</p>
+
+</section>
+<section >
+<p>
+In case you are not familiar with those, here are some plugins for most text editors:
+</p>
+
+<ul>
+<li>Emacs: <a href="https://github.com/joaotavora/yasnippet">https://github.com/joaotavora/yasnippet</a></li>
+<li>Vim: <a href="https://github.com/SirVer/ultisnips">https://github.com/SirVer/ultisnips</a></li>
+<li>Atom: <a href="https://flight-manual.atom.io/using-atom/sections/snippets/">https://flight-manual.atom.io/using-atom/sections/snippets/</a></li>
+<li>Sublime Text: <a href="https://medium.freecodecamp.org/a-guide-to-preserving-your-wrists-with-sublime-text-snippets-7541662a53f2">https://medium.freecodecamp.org/a-guide-to-preserving-your-wrists-with-sublime-text-snippets-7541662a53f2</a></li>
+
+</ul>
+
+<p>
+I believe all of these use the TextMate snippet syntax, which is good for
+sharing the simpler snippets.
+</p>
+
+<p>
+Of course, advanced users of these packages can customize snippets to do more,
+sometimes even call code (yasnippet can call Emacs Lisp, ultisnips can call
+Python). This is usually not portable but works better for more advanced
+snippets.
+</p>
+
+<p>
+Personal anecdote: learning to use those has saved me from wrist inflammation,
+which is a big problem in this line of work.
+</p>
+
+</section>
+<section >
+<p>
+So, when you have a framework in place, you know how the files should be laid
+out in your application, and you don't want to keep opening new files and
+expanding them manually, what do you do? Enter Rails generators.
+</p>
+
+</section>
+</section>
+<section>
+<section id="slide-org3778372">
+<h2 id="org3778372">Rails generators</h2>
+<p>
+Rails generators are a small DSL built on top of <a href="http://whatisthor.com/">Thor</a> (as are most of the
+commands in the `rails` executable) that allows one to write code that writes
+code. You can read more about its basics in the <a href="https://guides.rubyonrails.org/generators.html">official documentation</a>.
+</p>
+
+<p>
+For simpler scenarios, there is no necessity of writing a full-fledged
+generator, since you are usually well-served by a medium-to-large code
+snippet.
+</p>
+
+<p>
+Due to Ruby's extremely dynamic nature, we are able to perform some quite
+complex operations to generate our code. And we can thank most of these to:
+</p>
+
+</section>
+</section>
+<section>
+<section id="slide-orge14d667">
+<h2 id="orge14d667">Rails introspection mechanisms</h2>
+<p>
+The already mentioned TAoUP has a <a href="http://www.faqs.org/docs/artu/ch09s01.html#fetchmailconf">section</a> on what it calls "<a href="https://www.wikiwand.com/en/Metaclass">metaclass</a> hacking":
+</p>
+
+</section>
+<section >
+<blockquote nil>
+<p>
+I considered writing a glue layer that would explicitly know about the
+structure of all three classes and use that knowledge to grovel through the
+initializer creating matching objects, but rejected that idea because new
+class members were likely to be added over time as the configuration language
+grew new features. If the object-creation code were written in the obvious
+way, it would once again be fragile and tend to fall out of synchronization
+when either the class definitions or the initializer structure dumped by the
+&#x2013;configdump report generator changed. Again, a recipe for endless bugs.
+</p>
+
+<p>
+The better way would be data-driven programming - code that would analyze the
+shape and members of the initializer, query the class definitions themselves
+about their members, and then impedance-match the two sets.
+</p>
+</blockquote>
+
+</section>
+<section >
+<blockquote nil>
+<p>
+Lisp and Java programmers call this introspection; in some other
+object-oriented languages it's called metaclass hacking and is generally
+considered fearsomely esoteric, deep black magic. Most object-oriented
+languages don't support it at all; in those that do (Perl and Java among
+them), it tends to be a complicated and fragile undertaking. But Python's
+facilities for introspection and metaclass hacking are unusually accessible.
+</p>
+</blockquote>
+
+</section>
+<section >
+<p>
+Thankfully, <a href="https://www.leighhalliday.com/ruby-introspection-metaprogramming">Ruby's facilites</a> for this are very accessible too!
+</p>
+
+<p>
+Some ActiveRecord methods I used recently that has been quite helpful:
+</p>
+
+</section>
+<section >
+<ul>
+<li><p>
+attribute_types
+</p>
+
+<p>
+These are integrated with the <a href="https://api.rubyonrails.org/files/activemodel/README_rdoc.html">ActiveModel API</a> to provide model name
+introspections, conversions, translations and validations, among other
+features.
+</p>
+
+</section>
+<section >
+<div class="org-src-container">
+
+<pre  class="src src-ruby"><span style="color: #5B6268;"># </span><span style="color: #5B6268;">[5] pry(main)&gt; User.attribute_types</span>
+<span style="color: #5B6268;"># </span><span style="color: #5B6268;">=&gt;</span>
+<span style="color: #51afef;">{</span><span style="color: #98be65;">"id"</span>=&gt;
+  <span style="color: #5B6268;">#</span><span style="color: #5B6268;">&lt;ActiveModel::Type::Integer:0x0000560c033c4708</span>
+   <span style="color: #dcaeea;">@</span><span style="color: #ffffad249256;">limit</span>=<span style="color: #da8548; font-weight: bold;">8</span>,
+   <span style="color: #dcaeea;">@</span><span style="color: #ffffa8c5a263;">precision</span>=<span style="color: #a9a1e1;">nil</span>,
+   <span style="color: #dcaeea;">@</span><span style="color: #dd01c67371c7;">range</span>=-<span style="color: #da8548; font-weight: bold;">9223372036854775808</span>...<span style="color: #da8548; font-weight: bold;">9223372036854775808</span>,
+   <span style="color: #dcaeea;">@</span><span style="color: #ffffa873a3f9;">scale</span>=<span style="color: #a9a1e1;">nil</span>&gt;,
+ <span style="color: #98be65;">"email"</span>=&gt;<span style="color: #5B6268;">#</span><span style="color: #5B6268;">&lt;ActiveModel::Type::String:0x0000560c0340c058 @limit=nil, @precision=nil, @scale=nil&gt;,</span>
+ <span style="color: #98be65;">"encrypted_password"</span>=&gt;<span style="color: #5B6268;">#</span><span style="color: #5B6268;">&lt;ActiveModel::Type::String:0x0000560c0340c058 @limit=nil, @precision=nil, @scale=nil&gt;,</span>
+ <span style="color: #98be65;">"reset_password_token"</span>=&gt;<span style="color: #5B6268;">#</span><span style="color: #5B6268;">&lt;ActiveModel::Type::String:0x0000560c0340c058 @limit=nil, @precision=nil, @scale=nil&gt;,</span>
+ <span style="color: #98be65;">"reset_password_sent_at"</span>=&gt;
+  <span style="color: #5B6268;">#</span><span style="color: #5B6268;">&lt;ActiveRecord::ConnectionAdapters::PostgreSQL::OID::DateTime:0x0000560c03417700</span>
+   <span style="color: #dcaeea;">@</span><span style="color: #ffffad249256;">limit</span>=<span style="color: #a9a1e1;">nil</span>,
+   <span style="color: #dcaeea;">@</span><span style="color: #ffffa8c5a263;">precision</span>=<span style="color: #a9a1e1;">nil</span>,
+   <span style="color: #dcaeea;">@</span><span style="color: #ffffa873a3f9;">scale</span>=<span style="color: #a9a1e1;">nil</span>&gt;,
+ <span style="color: #98be65;">"status"</span>=&gt;
+  <span style="color: #5B6268;">#</span><span style="color: #5B6268;">&lt;ActiveRecord::Enum::EnumType:0x00007f352833dd80</span>
+   <span style="color: #dcaeea;">@</span><span style="color: #e11ec50471be;">mapping</span>=<span style="color: #c678dd;">{</span><span style="color: #98be65;">"inactive"</span>=&gt;<span style="color: #da8548; font-weight: bold;">0</span>, <span style="color: #98be65;">"active"</span>=&gt;<span style="color: #da8548; font-weight: bold;">1</span>, <span style="color: #98be65;">"pending_approval"</span>=&gt;<span style="color: #da8548; font-weight: bold;">2</span><span style="color: #c678dd;">}</span>,
+   <span style="color: #dcaeea;">@</span><span style="color: #e05fb63affff;">name</span>=<span style="color: #98be65;">"status"</span>,
+   <span style="color: #dcaeea;">@</span><span style="color: #195cd78affff;">subtype</span>=
+    <span style="color: #5B6268;">#</span><span style="color: #5B6268;">&lt;ActiveModel::Type::Integer:0x0000560c033c4870</span>
+     <span style="color: #dcaeea;">@</span><span style="color: #ffffad249256;">limit</span>=<span style="color: #da8548; font-weight: bold;">4</span>,
+     <span style="color: #dcaeea;">@</span><span style="color: #ffffa8c5a263;">precision</span>=<span style="color: #a9a1e1;">nil</span>,
+     <span style="color: #dcaeea;">@</span><span style="color: #dd01c67371c7;">range</span>=-<span style="color: #da8548; font-weight: bold;">2147483648</span>...<span style="color: #da8548; font-weight: bold;">2147483648</span>,
+     <span style="color: #dcaeea;">@</span><span style="color: #ffffa873a3f9;">scale</span>=<span style="color: #a9a1e1;">nil</span>&gt;&gt;<span style="color: #51afef;">}</span>
+</pre>
+</div></li>
+
+</ul>
+
+</section>
+<section >
+<ul>
+<li><p>
+reflect_on_all_associations
+</p>
+
+<p>
+From the <a href="https://api.rubyonrails.org/classes/ActiveRecord/Reflection/ClassMethods.html">documentation</a>:
+</p>
+
+<blockquote nil>
+<p>
+Reflection enables the ability to examine the associations and aggregations
+of Active Record classes and objects. This information, for example, can be
+used in a form builder that takes an Active Record object and creates input
+fields for all of the attributes depending on their type and displays the
+associations to other objects.
+</p>
+</blockquote></li>
+
+</ul>
+
+</section>
+<section >
+<p>
+There's a whole book on the subject of <a href="https://www.amazon.com/gp/product/1941222129/ref=as_li_qf_asin_il_tl?ie=UTF8&amp;tag=leigh0b-20&amp;creative=9325&amp;linkCode=as2&amp;creativeASIN=1941222129&amp;linkId=018450bb9619638d9531fd11c0c3b710">metaprogramming Ruby</a>, you should read
+it if you haven't already. And if you want your black belt on metaprogramming
+techniques, you can reach for Paul Graham's <a href="https://github.com/DalekBaldwin/on-lisp">On Lisp</a>.
+</p>
+
+</section>
+</section>
+<section>
+<section id="slide-orge378634">
+<h2 id="orge378634">ERB templates</h2>
+<p>
+Rails' generators include some helper methods to work with ERB templates,
+which are:
+</p>
+
+<blockquote nil>
+<p>
+ERB (Embedded RuBy) is a feature of Ruby that enables you to conveniently
+generate any kind of text, in any quantity, from templates. The templates
+themselves combine plain text with Ruby code for variable substitution and
+flow control, making them easy to write and maintain.
+</p>
+</blockquote>
+
+<p>
+In case you need a quick introduction to their syntax and capabilities, see
+this <a href="https://www.stuartellis.name/articles/erb/">blog post</a>.
+</p>
+
+</section>
+<section >
+<p>
+Combined with the introspection APIs shown above, it is not too difficult to
+create quite complex generators that are "self-referential". One common
+pattern for this in Ruby would be:
+</p>
+
+<div class="org-src-container">
+
+<pre  class="src src-ruby"><span style="color: #b089d2817f6b;">def</span> <span style="color: #ffffa9ac9e5d;">some_generator_method</span><span style="color: #51afef;">(</span><span style="color: #5f05dc70b4e6;">class_name</span><span style="color: #51afef;">)</span>
+  <span style="color: #5f05dc70b4e6;">class_name</span>.<span style="color: #cf7dbb15ffff;">constantize</span>.<span style="color: #7157db46a864;">attribute_types</span>.<span style="color: #ffffa855ddd7;">map</span> <span style="color: #51afef;">{</span> |<span style="color: #0000dc7befc0;">attribute</span>|
+    <span style="color: #5B6268;"># </span><span style="color: #5B6268;">your logic goes here...</span>
+  <span style="color: #51afef;">}</span>
+<span style="color: #f23cb0abfaaf;">end</span>
+</pre>
+</div>
+
+<p>
+Methods defined inside a generator are automatically in scope of the templates
+accessed by it, so you can use that for isolating the logic that goes into
+some more advanced code generation, and keep the templates to structure and
+layout the data.
+</p>
+
+</section>
+<section >
+<p>
+Here's an example ERB template from a generator we created recently, one that
+automatically writes test code for a GraphQL resource:
+</p>
+
+</section>
+<section >
+<div class="org-src-container">
+
+<pre  class="src src-web"><span style="color: #f3aabdbc753e;">RSpec</span>.<span style="color: #f235b0acfab4;">describe</span> '&lt;%= <span style="color: #e9e8c1be7298;">model_class</span> %&gt;' <span style="color: #ffffa84da4bc;">do</span>
+  <span style="color: #7dc2da2e9fb5;">include_context</span> '<span style="color: #0000dbcef676;">GraphQL</span> <span style="color: #77eacde0ffff;">test</span>'
+  <span style="color: #0000d991ffff;">let</span>!(:&lt;%= <span style="color: #e9e8c1be7298;">model_class</span>.<span style="color: #0000d915ffff;">underscore</span> %&gt;) { <span style="color: #ffffa949e28d;">create</span>(:&lt;%= <span style="color: #e9e8c1be7298;">model_class</span>.<span style="color: #0000d915ffff;">underscore</span> %&gt;) }
+  <span style="color: #0000d991ffff;">let</span>(:&lt;%= <span style="color: #e9e8c1be7298;">model_class</span>.<span style="color: #0000d915ffff;">underscore</span> %&gt;<span style="color: #0e35dd87dab0;">_attrs</span>) { <span style="color: #2903dd97d2b3;">OpenStruct</span>.<span style="color: #ffffa5b3c507;">new</span>(<span style="color: #a3f3c5b5ffff;">attributes_for</span>(:&lt;%= <span style="color: #e9e8c1be7298;">model_class</span>.<span style="color: #0000d915ffff;">underscore</span> %&gt;)) }
+
+  <span style="color: #f235b0acfab4;">describe</span> '<span style="color: #db87b7aaffff;">query</span>' <span style="color: #ffffa84da4bc;">do</span>
+    <span style="color: #0000d991ffff;">let</span>(:<span style="color: #ffffa654cf8c;">expected_</span>&lt;%= <span style="color: #e9e8c1be7298;">model_class</span>.<span style="color: #0000d915ffff;">underscore</span> %&gt;<span style="color: #aff4d2a07fb8;">_response</span>) {
+      <span style="color: #ffffa644b337;">hash_including</span>(
+        <span style="color: #f1cab0cffb09;">id</span>: &lt;%= <span style="color: #e9e8c1be7298;">model_class</span>.<span style="color: #0000d915ffff;">underscore</span> %&gt;.<span style="color: #f1cab0cffb09;">id</span>,
+&lt;% <span style="color: #aa4bd3c382c5;">model_attributes</span>.<span style="color: #90b1d7f692ac;">each</span> <span style="color: #ffffa84da4bc;">do</span> <span style="color: #e877c24e725d;">|name</span>, <span style="color: #a4a1c590ffff;">_|</span> %&gt;
+        &lt;%= <span style="color: #e05fb63affff;">name</span>.<span style="color: #ffffa5bbbbe9;">camelize</span>(:<span style="color: #e4ffc39c71f5;">lower</span>) %&gt;: &lt;%= <span style="color: #e9e8c1be7298;">model_class</span>.<span style="color: #0000d915ffff;">underscore</span> %&gt;.&lt;%= <span style="color: #e05fb63affff;">name</span>.<span style="color: #0000d915ffff;">underscore</span> %&gt;,
+&lt;% <span style="color: #f23cb0abfaaf;">end</span> %&gt;
+      )
+    }
+
+    <span style="color: #f235b0acfab4;">describe</span> '<span style="color: #cd45bbb0ffff;">all</span>' <span style="color: #ffffa84da4bc;">do</span>
+      <span style="color: #0000d991ffff;">let</span>(:<span style="color: #db87b7aaffff;">query</span>) <span style="color: #ffffa84da4bc;">do</span>
+        &lt;&lt;~<span style="color: #0000d879ffff;">GRAPHQL</span>
+          <span style="color: #db87b7aaffff;">query</span> {
+            &lt;%= <span style="color: #e9e8c1be7298;">model_class</span>.<span style="color: #0000daa6feb8;">pluralize</span>.<span style="color: #ffffa5bbbbe9;">camelize</span>(:<span style="color: #e4ffc39c71f5;">lower</span>) %&gt; {
+              <span style="color: #7312cea0ffff;">edges</span> {
+                <span style="color: #0000db91f86a;">node</span> {
+                  <span style="color: #f1cab0cffb09;">id</span>
+&lt;% <span style="color: #aa4bd3c382c5;">model_attributes</span>.<span style="color: #90b1d7f692ac;">each</span> <span style="color: #ffffa84da4bc;">do</span> <span style="color: #e877c24e725d;">|name</span>, <span style="color: #a4a1c590ffff;">_|</span> %&gt;
+                  &lt;%= <span style="color: #e05fb63affff;">name</span>.<span style="color: #ffffa5bbbbe9;">camelize</span>(:<span style="color: #e4ffc39c71f5;">lower</span>) %&gt;
+&lt;% <span style="color: #f23cb0abfaaf;">end</span> %&gt;
+                }
+              }
+            }
+          }
+        <span style="color: #0000d879ffff;">GRAPHQL</span>
+      <span style="color: #f23cb0abfaaf;">end</span>
+
+      <span style="color: #ffffa5a9c335;">it</span> '<span style="color: #ffffa72ed6ce;">returns</span> <span style="color: #cd45bbb0ffff;">all</span> &lt;%= <span style="color: #e9e8c1be7298;">model_class</span>.<span style="color: #0000daa6feb8;">pluralize</span>.<span style="color: #0000d915ffff;">underscore</span> %&gt;' <span style="color: #ffffa84da4bc;">do</span>
+        <span style="color: #0000db6ef972;">expect</span>(<span style="color: #f1fdb0bffae1;">response</span>).<span style="color: #ffffaa269c6d;">to</span> <span style="color: #0000dd3de409;">include</span>(
+          <span style="color: #ffffa675b144;">data</span>: <span style="color: #ffffa644b337;">hash_including</span>(
+            &lt;%= <span style="color: #e9e8c1be7298;">model_class</span>.<span style="color: #0000daa6feb8;">pluralize</span>.<span style="color: #ffffa5bbbbe9;">camelize</span>(:<span style="color: #e4ffc39c71f5;">lower</span>) %&gt;: <span style="color: #ffffa644b337;">hash_including</span>(
+              <span style="color: #7312cea0ffff;">edges</span>: <span style="color: #ae6fd2f08085;">array_including</span>(<span style="color: #ffffa644b337;">hash_including</span>(
+                <span style="color: #0000db91f86a;">node</span>: <span style="color: #ffffa654cf8c;">expected_</span>&lt;%= <span style="color: #e9e8c1be7298;">model_class</span>.<span style="color: #0000d915ffff;">underscore</span> %&gt;<span style="color: #aff4d2a07fb8;">_response</span>
+              ))
+            )
+          )
+        )
+      <span style="color: #f23cb0abfaaf;">end</span>
+    <span style="color: #f23cb0abfaaf;">end</span>
+  <span style="color: #f23cb0abfaaf;">end</span>
+<span style="color: #f23cb0abfaaf;">end</span>
+</pre>
+</div>
+
+</section>
+</section>
+<section>
+<section id="slide-org422e114">
+<h2 id="org422e114">Testing</h2>
+
+<div class="figure">
+<p><img src="img-codegen/0347c3efdc17cc1959d089f60b8b2fc267d9093caa8e8cb483bf476b58e63e45_2018-09-05_00-51-44.jpg" alt="0347c3efdc17cc1959d089f60b8b2fc267d9093caa8e8cb483bf476b58e63e45_2018-09-05_00-51-44.jpg" />
+</p>
+</div>
+
+<p>
+The Ruby community is known for its adherence to TDD practices. Rails'
+generators are no exception, they come with their own convenience methods for
+testing the generated files.
+</p>
+
+</section>
+<section >
+<p>
+Unfortunately the official documentation is lacking comprehensive material on
+<span class="underline">how</span> to actually test the generators. There is a <a href="https://rossta.net/blog/testing-rails-generators.html">blog post</a> by the maintainer
+of the montrose gem, which has helped us a lot.
+</p>
+
+<p>
+Rails is biased towards minitest, which is not much of a problem if you are a
+RSpec fan since it has a <a href="https://github.com/seattlerb/minitest#specs">spec-like syntax</a>. There is <a href="https://github.com/alexrothenberg/ammeter">ammeter</a> if you really want
+to use RSpec, though.
+</p>
+
+</section>
+<section >
+<iframe width="560" height="315" src="https://www.youtube.com/embed/3Y9fr3ndW8o" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+
+</section>
+</section>
+<section>
+<section id="slide-orgec6c615">
+<h2 id="orgec6c615">Questions?</h2>
+
+<div class="figure">
+<p><img src="img-codegen/images_2018-09-05_01-07-27.jpeg" alt="images_2018-09-05_01-07-27.jpeg" />
+</p>
+</div>
+</div>
+</div>
+<script src="http://cdn.jsdelivr.net/reveal.js/3.0.0/lib/js/head.min.js"></script>
+<script src="http://cdn.jsdelivr.net/reveal.js/3.0.0/js/reveal.js"></script>
+
+<script>
+// Full list of configuration options available here:
+// https://github.com/hakimel/reveal.js#configuration
+Reveal.initialize({
+
+controls: true,
+progress: true,
+history: true,
+center: true,
+slideNumber: 'c',
+rollingLinks: true,
+keyboard: true,
+overview: true,
+width: 1200,
+height: 800,
+margin: 0.00,
+minScale: 0.10,
+maxScale: 1.00,
+
+theme: Reveal.getQueryHash().theme, // available themes are in /css/theme
+transition: Reveal.getQueryHash().transition || 'none', // default/cube/page/concave/zoom/linear/fade/none
+transitionSpeed: 'default',
+multiplex: {
+    secret: '', // null if client
+    id: '', // id, obtained from socket.io server
+    url: '' // Location of socket.io server
+},
+
+// Optional libraries used to extend on reveal.js
+dependencies: [
+ { src: 'http://cdn.jsdelivr.net/reveal.js/3.0.0/lib/js/classList.js', condition: function() { return !document.body.classList; } },
+ { src: 'http://cdn.jsdelivr.net/reveal.js/3.0.0/plugin/markdown/marked.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+ { src: 'http://cdn.jsdelivr.net/reveal.js/3.0.0/plugin/markdown/markdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+ { src: 'http://cdn.jsdelivr.net/reveal.js/3.0.0/plugin/zoom-js/zoom.js', async: true, condition: function() { return !!document.body.classList; } },
+ { src: 'http://cdn.jsdelivr.net/reveal.js/3.0.0/plugin/notes/notes.js', async: true, condition: function() { return !!document.body.classList; } }]
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,318 @@
+# -*- mode: Org; org-download-image-dir: "./img-codegen"; org-download-heading-lvl: nil; engine: "erb"; -*-
+#+OPTIONS: reveal_center:t reveal_progress:t reveal_history:t reveal_control:t
+#+OPTIONS: reveal_mathjax:t reveal_rolling_links:t reveal_keyboard:t reveal_overview:t num:nil
+#+OPTIONS: reveal_width:1200 reveal_height:800
+#+OPTIONS: toc:nil timestamp:nil author:nil ^:nil
+#+REVEAL_MARGIN: 0.0
+#+REVEAL_MIN_SCALE: 0.1
+#+REVEAL_MAX_SCALE: 1.0
+#+REVEAL_TRANS: none
+#+REVEAL_THEME: night
+#+REVEAL_HLEVEL: 2
+#+REVEAL_DEFAULT_FRAG_STYLE: roll-in
+#+REVEAL_ROOT: http://cdn.jsdelivr.net/reveal.js/3.0.0/
+
+#+TITLE: Code generation strategies in Rails
+
+* Overview
+
+  #+BEGIN_QUOTE
+  "I'd rather write programs to write programs than write programs"
+  - Dick Sites
+  #+END_QUOTE
+  [fn:1]
+
+  This comes from a [[https://sites.google.com/site/dicksites/][compiler writer]], one of the wise elders of our profession,
+  but it applies even to more mundane activities such as designing a web page.
+  Which can be seen as a sort of code-generation machine on its own, since we're
+  usually doing quite a bit of logic to output the right HTML/JS/CSS.
+
+* Copy and paste
+
+  #+DOWNLOADED: https://c1.staticflickr.com/8/7232/6875349654_a0d8e35bb1.jpg @ 2018-09-04 23:03:52
+  [[file:img-codegen/6875349654_a0d8e35bb1_2018-09-04_23-03-52.jpg]]
+
+  #+REVEAL: split
+  #+BEGIN_QUOTE
+  Human beings are notoriously bad at sweating the details.
+
+  Accordingly, any kind of hand-hacking of programs is a rich source of delays and errors.
+
+  The simpler and more abstracted your program specification can be, the more likely it is that the human designer will have gotten it right.
+
+  Generated code (at every level) is almost always cheaper and more reliable than hand-hacked.
+
+  We all know this is true (it's why we have compilers and interpreters, after
+  all) but we often don't think about the implications.
+  #+END_QUOTE
+
+  #+REVEAL: split
+  #+BEGIN_QUOTE
+  High-level-language code that's repetitive and mind-numbing for humans to
+  write is just as productive a target for a code generator as machine code.
+
+  It pays to use code generators when they can raise the level of abstraction -
+  that is, when the specification language for the generator is simpler than the
+  generated code, and the code doesn't have to be hand-hacked afterwards.
+
+  - The Art of Unix Programming
+  #+END_QUOTE
+  [fn:2]
+
+  This quote was from a book written in 2003, funny how the world hasn't changed
+  a lot, has it?
+
+* Code snippets
+
+  #+HTML: <iframe width="560" height="315" src="https://www.youtube.com/embed/1W66B3CHaUo" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+
+  This is not _that_ different from the copy-paste technique, it only automates
+  away the find-and-replace part. Still, this small abstraction over the
+  changing part is already a gamechanger.
+
+  #+REVEAL: split
+  In case you are not familiar with those, here are some plugins for most text editors:
+
+  - Emacs: https://github.com/joaotavora/yasnippet
+  - Vim: https://github.com/SirVer/ultisnips
+  - Atom: https://flight-manual.atom.io/using-atom/sections/snippets/
+  - Sublime Text: https://medium.freecodecamp.org/a-guide-to-preserving-your-wrists-with-sublime-text-snippets-7541662a53f2
+
+  I believe all of these use the TextMate snippet syntax, which is good for
+  sharing the simpler snippets.
+
+  Of course, advanced users of these packages can customize snippets to do more,
+  sometimes even call code (yasnippet can call Emacs Lisp, ultisnips can call
+  Python). This is usually not portable but works better for more advanced
+  snippets.
+
+  Personal anecdote: learning to use those has saved me from wrist inflammation,
+  which is a big problem in this line of work.
+
+  #+REVEAL: split
+  So, when you have a framework in place, you know how the files should be laid
+  out in your application, and you don't want to keep opening new files and
+  expanding them manually, what do you do? Enter Rails generators.
+
+* Rails generators
+
+  Rails generators are a small DSL built on top of [[http://whatisthor.com/][Thor]] (as are most of the
+  commands in the `rails` executable) that allows one to write code that writes
+  code. You can read more about its basics in the [[https://guides.rubyonrails.org/generators.html][official documentation]].
+
+  For simpler scenarios, there is no necessity of writing a full-fledged
+  generator, since you are usually well-served by a medium-to-large code
+  snippet.
+
+  Due to Ruby's extremely dynamic nature, we are able to perform some quite
+  complex operations to generate our code. And we can thank most of these to:
+
+* Rails introspection mechanisms
+
+  The already mentioned TAoUP has a [[http://www.faqs.org/docs/artu/ch09s01.html#fetchmailconf][section]] on what it calls "[[https://www.wikiwand.com/en/Metaclass][metaclass]] hacking":
+
+  #+REVEAL: split
+  #+BEGIN_QUOTE
+  I considered writing a glue layer that would explicitly know about the
+  structure of all three classes and use that knowledge to grovel through the
+  initializer creating matching objects, but rejected that idea because new
+  class members were likely to be added over time as the configuration language
+  grew new features. If the object-creation code were written in the obvious
+  way, it would once again be fragile and tend to fall out of synchronization
+  when either the class definitions or the initializer structure dumped by the
+  --configdump report generator changed. Again, a recipe for endless bugs.
+
+  The better way would be data-driven programming - code that would analyze the
+  shape and members of the initializer, query the class definitions themselves
+  about their members, and then impedance-match the two sets.
+  #+END_QUOTE
+
+  #+REVEAL: split
+  #+BEGIN_QUOTE
+  Lisp and Java programmers call this introspection; in some other
+  object-oriented languages it's called metaclass hacking and is generally
+  considered fearsomely esoteric, deep black magic. Most object-oriented
+  languages don't support it at all; in those that do (Perl and Java among
+  them), it tends to be a complicated and fragile undertaking. But Python's
+  facilities for introspection and metaclass hacking are unusually accessible.
+  #+END_QUOTE
+
+  #+REVEAL: split
+  Thankfully, [[https://www.leighhalliday.com/ruby-introspection-metaprogramming][Ruby's facilites]] for this are very accessible too!
+
+  Some ActiveRecord methods I used recently that has been quite helpful:
+
+  #+REVEAL: split
+  - attribute_types
+
+    These are integrated with the [[https://api.rubyonrails.org/files/activemodel/README_rdoc.html][ActiveModel API]] to provide model name
+    introspections, conversions, translations and validations, among other
+    features.
+
+    #+REVEAL: split
+    #+BEGIN_SRC ruby
+      # [5] pry(main)> User.attribute_types
+      # =>
+      {"id"=>
+        #<ActiveModel::Type::Integer:0x0000560c033c4708
+         @limit=8,
+         @precision=nil,
+         @range=-9223372036854775808...9223372036854775808,
+         @scale=nil>,
+       "email"=>#<ActiveModel::Type::String:0x0000560c0340c058 @limit=nil, @precision=nil, @scale=nil>,
+       "encrypted_password"=>#<ActiveModel::Type::String:0x0000560c0340c058 @limit=nil, @precision=nil, @scale=nil>,
+       "reset_password_token"=>#<ActiveModel::Type::String:0x0000560c0340c058 @limit=nil, @precision=nil, @scale=nil>,
+       "reset_password_sent_at"=>
+        #<ActiveRecord::ConnectionAdapters::PostgreSQL::OID::DateTime:0x0000560c03417700
+         @limit=nil,
+         @precision=nil,
+         @scale=nil>,
+       "status"=>
+        #<ActiveRecord::Enum::EnumType:0x00007f352833dd80
+         @mapping={"inactive"=>0, "active"=>1, "pending_approval"=>2},
+         @name="status",
+         @subtype=
+          #<ActiveModel::Type::Integer:0x0000560c033c4870
+           @limit=4,
+           @precision=nil,
+           @range=-2147483648...2147483648,
+           @scale=nil>>}
+    #+END_SRC
+
+  #+REVEAL: split
+  - reflect_on_all_associations
+
+    From the [[https://api.rubyonrails.org/classes/ActiveRecord/Reflection/ClassMethods.html][documentation]]:
+
+    #+BEGIN_QUOTE
+    Reflection enables the ability to examine the associations and aggregations
+    of Active Record classes and objects. This information, for example, can be
+    used in a form builder that takes an Active Record object and creates input
+    fields for all of the attributes depending on their type and displays the
+    associations to other objects.
+    #+END_QUOTE
+
+  #+REVEAL: split
+  There's a whole book on the subject of [[https://www.amazon.com/gp/product/1941222129/ref=as_li_qf_asin_il_tl?ie=UTF8&tag=leigh0b-20&creative=9325&linkCode=as2&creativeASIN=1941222129&linkId=018450bb9619638d9531fd11c0c3b710][metaprogramming Ruby]], you should read
+  it if you haven't already. And if you want your black belt on metaprogramming
+  techniques, you can reach for Paul Graham's [[https://github.com/DalekBaldwin/on-lisp][On Lisp]].
+
+* ERB templates
+
+  Rails' generators include some helper methods to work with ERB templates,
+  which are:
+
+  #+BEGIN_QUOTE
+  ERB (Embedded RuBy) is a feature of Ruby that enables you to conveniently
+  generate any kind of text, in any quantity, from templates. The templates
+  themselves combine plain text with Ruby code for variable substitution and
+  flow control, making them easy to write and maintain.
+  #+END_QUOTE
+
+  In case you need a quick introduction to their syntax and capabilities, see
+  this [[https://www.stuartellis.name/articles/erb/][blog post]].
+
+  #+REVEAL: split
+  Combined with the introspection APIs shown above, it is not too difficult to
+  create quite complex generators that are "self-referential". One common
+  pattern for this in Ruby would be:
+
+  #+BEGIN_SRC ruby
+    def some_generator_method(class_name)
+      class_name.constantize.attribute_types.map { |attribute|
+        # your logic goes here...
+      }
+    end
+  #+END_SRC
+
+  Methods defined inside a generator are automatically in scope of the templates
+  accessed by it, so you can use that for isolating the logic that goes into
+  some more advanced code generation, and keep the templates to structure and
+  layout the data.
+
+  #+REVEAL: split
+  Here's an example ERB template from a generator we created recently, one that
+  automatically writes test code for a GraphQL resource:
+
+  #+REVEAL: split
+  #+BEGIN_SRC web
+    RSpec.describe '<%= model_class %>' do
+      include_context 'GraphQL test'
+      let!(:<%= model_class.underscore %>) { create(:<%= model_class.underscore %>) }
+      let(:<%= model_class.underscore %>_attrs) { OpenStruct.new(attributes_for(:<%= model_class.underscore %>)) }
+
+      describe 'query' do
+        let(:expected_<%= model_class.underscore %>_response) {
+          hash_including(
+            id: <%= model_class.underscore %>.id,
+    <% model_attributes.each do |name, _| %>
+            <%= name.camelize(:lower) %>: <%= model_class.underscore %>.<%= name.underscore %>,
+    <% end %>
+          )
+        }
+
+        describe 'all' do
+          let(:query) do
+            <<~GRAPHQL
+              query {
+                <%= model_class.pluralize.camelize(:lower) %> {
+                  edges {
+                    node {
+                      id
+    <% model_attributes.each do |name, _| %>
+                      <%= name.camelize(:lower) %>
+    <% end %>
+                    }
+                  }
+                }
+              }
+            GRAPHQL
+          end
+
+          it 'returns all <%= model_class.pluralize.underscore %>' do
+            expect(response).to include(
+              data: hash_including(
+                <%= model_class.pluralize.camelize(:lower) %>: hash_including(
+                  edges: array_including(hash_including(
+                    node: expected_<%= model_class.underscore %>_response
+                  ))
+                )
+              )
+            )
+          end
+        end
+      end
+    end
+  #+END_SRC
+
+* Testing
+
+  #+DOWNLOADED: https://ngeor.files.wordpress.com/2016/07/0347c3efdc17cc1959d089f60b8b2fc267d9093caa8e8cb483bf476b58e63e45.jpg @ 2018-09-05 00:51:44
+  [[file:img-codegen/0347c3efdc17cc1959d089f60b8b2fc267d9093caa8e8cb483bf476b58e63e45_2018-09-05_00-51-44.jpg]]
+
+  The Ruby community is known for its adherence to TDD practices. Rails'
+  generators are no exception, they come with their own convenience methods for
+  testing the generated files.
+
+  #+REVEAL: split
+  Unfortunately the official documentation is lacking comprehensive material on
+  _how_ to actually test the generators. There is a [[https://rossta.net/blog/testing-rails-generators.html][blog post]] by the maintainer
+  of the montrose gem, which has helped us a lot.
+
+  Rails is biased towards minitest, which is not much of a problem if you are a
+  RSpec fan since it has a [[https://github.com/seattlerb/minitest#specs][spec-like syntax]]. There is [[https://github.com/alexrothenberg/ammeter][ammeter]] if you really want
+  to use RSpec, though.
+
+  #+REVEAL: split
+  #+HTML: <iframe width="560" height="315" src="https://www.youtube.com/embed/3Y9fr3ndW8o" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+
+* Questions?
+
+  #+DOWNLOADED: https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQZQXl8HkU43nQLsPI8_xzBMfvA1S1WEEuE0BNg1GhAKe5SGcxI @ 2018-09-05 01:07:27
+  [[file:img-codegen/images_2018-09-05_01-07-27.jpeg]]
+
+* References                                                      :noexport:
+
+[fn:2] http://www.faqs.org/docs/artu/ch01s06.html#id2878742
+
+[fn:1] https://www.linkedin.com/pulse/20140715033631-3300752--i-d-rather-write-programs-to-write-programs-than-write-programs-dick-sites/

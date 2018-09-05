@@ -22,3 +22,7 @@ title: Presentations
 # [Crystal language]({{ site.url }}/presentations/crystal-lang.html) #
 
 [Presentation]({{ site.url }}/presentations/crystal-lang.html) about the Crystal language
+
+# [Code generation in Rails]({{ site.url }}/presentations/code-generation-rails.html) #
+
+[Presentation]({{ site.url }}/presentations/code-generation-rails.html) about code generators in Rails
