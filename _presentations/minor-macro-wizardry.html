@@ -7,9 +7,9 @@
 <style type="text/css">
 .underline { text-decoration: underline; }
 </style>
-<link rel="stylesheet" href="http://cdn.jsdelivr.net/reveal.js/3.0.0/css/reveal.css"/>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/reveal.js/3.0.0/css/reveal.css"/>
 
-<link rel="stylesheet" href="http://cdn.jsdelivr.net/reveal.js/3.0.0/css/theme/night.css" id="theme"/>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/reveal.js/3.0.0/css/theme/night.css" id="theme"/>
 
 
 <!-- If the query includes 'print-pdf', include the PDF print sheet -->
@@ -18,7 +18,7 @@
         var link = document.createElement( 'link' );
         link.rel = 'stylesheet';
         link.type = 'text/css';
-        link.href = 'http://cdn.jsdelivr.net/reveal.js/3.0.0/css/print/pdf.css';
+        link.href = 'https://cdn.jsdelivr.net/reveal.js/3.0.0/css/print/pdf.css';
         document.getElementsByTagName( 'head' )[0].appendChild( link );
     }
 </script>
@@ -46,7 +46,7 @@ used to improve our code.
 </p>
 
 <p class="fragment roll-in">
-He wrote the book <a href="http://www.paulgraham.com/onlisp.html" class="fragment roll-in">On Lisp</a>.
+He wrote the book <a href="https://www.paulgraham.com/onlisp.html" class="fragment roll-in">On Lisp</a>.
 </p>
 
 <blockquote  class="fragment roll-in">
@@ -95,7 +95,7 @@ does.
 </section>
 <section >
 <p>
-In Ruby, you can use <a href="http://ruby-doc.org/stdlib-2.0.0/libdoc/ripper/rdoc/Ripper.html">Ripper</a> (built-in) to check how a lexed program looks like:
+In Ruby, you can use <a href="https://ruby-doc.org/stdlib-2.0.0/libdoc/ripper/rdoc/Ripper.html">Ripper</a> (built-in) to check how a lexed program looks like:
 </p>
 
 <div class="org-src-container">
@@ -234,7 +234,7 @@ one page of code. Don't believe such a thing could exist?
 </section>
 <section >
 <p>
-This is the definition of eval (taken from this <a href="http://norvig.com/lispy2.html">article</a>) for the original Lisp interpreter, written by
+This is the definition of eval (taken from this <a href="https://norvig.com/lispy2.html">article</a>) for the original Lisp interpreter, written by
 <a href="https://en.wikipedia.org/wiki/Steve_Russell_(computer_scientist)">Steve Russell</a> (who also coded one of the first videogames in the world,
 <a href="https://en.wikipedia.org/wiki/Spacewar!">Spacewar!</a>):
 </p>
@@ -290,7 +290,7 @@ almost trivial.
 <h3 id="orgab740c2">So, why so much buzz about Lisp macros?</h3>
 <p>
 Programs that manipulate other programs are kind of a big deal. On the
-theoretical side, we can <a href="http://schemeworkshop.org/2006/11-ghuloum.pdf">implement whole compilers</a> by successful phases of
+theoretical side, we can <a href="https://schemeworkshop.org/2006/11-ghuloum.pdf">implement whole compilers</a> by successful phases of
 transformations on ASTs<sup><a id="fnr.1" class="footref" href="#fn.1">1</a></sup> (and it seems that someone <a href="https://github.com/namin/inc">already did</a>).
 </p>
 
@@ -319,12 +319,12 @@ Compile-time code analysis and optimization
 </p>
 
 <p>
-My favorite real-life example of such techniques is <a href="http://weitz.de/cl-ppcre/">CL-PPCRE</a>, the regex
+My favorite real-life example of such techniques is <a href="https://weitz.de/cl-ppcre/">CL-PPCRE</a>, the regex
 library.
 </p></li>
 
 <li><p>
-Implementing <a href="https://github.com/LuxLang/lux">completely</a> new <a href="http://www.shenlanguage.org/">languages</a> on top of your <a href="https://www.common-lisp.net/">host language</a>
+Implementing <a href="https://github.com/LuxLang/lux">completely</a> new <a href="https://www.shenlanguage.org/">languages</a> on top of your <a href="https://www.common-lisp.net/">host language</a>
 </p>
 
 <p>
@@ -344,7 +344,7 @@ might end with a completely different language such as Lux or Shen&#x2026;
 In the Ruby examples above, we discussed how inconvenient it would be if we
 had to traverse and rewrite all those trees in our metaprogram. Here's an
 example of what it would look like in Scheme (shamelessly taken from this
-<a href="http://repository.readscheme.org/ftp/papers/pepm99/bawden.pdf">paper</a><sup><a id="fnr.2" class="footref" href="#fn.2">2</a></sup>):
+<a href="https://repository.readscheme.org/ftp/papers/pepm99/bawden.pdf">paper</a><sup><a id="fnr.2" class="footref" href="#fn.2">2</a></sup>):
 </p>
 
 <div class="org-src-container">
@@ -398,7 +398,7 @@ Using quasiquotes, the code above can be written thus:
 </section>
 <section >
 <p>
-These are mostly taken from this <a href="https://www.youtube.com/watch?v=npa2PO4gAMo&amp;t=3626s">awesome presentation</a> by <a href="http://swannodette.github.io/">David Nolen</a>, a
+These are mostly taken from this <a href="https://www.youtube.com/watch?v=npa2PO4gAMo&amp;t=3626s">awesome presentation</a> by <a href="https://swannodette.github.io/">David Nolen</a>, a
 famous programmer in the Clojure community.
 </p>
 
@@ -508,13 +508,13 @@ package:
 </div>
 
 <p>
-Notice that this macro is <a href="http://www.bookshelf.jp/texi/onlisp/onlisp_10.html">capturing</a> scope, given that its expansion can
+Notice that this macro is <a href="https://www.bookshelf.jp/texi/onlisp/onlisp_10.html">capturing</a> scope, given that its expansion can
 "shadow" the value of a pre-existing "it" variable.
 </p>
 
 <p>
 There are some techniques to use and avoid this, and I refer the reader to
-<a href="http://unintelligible.org/onlisp/onlisp.html#SEC77">chapter 9 of "On Lisp"</a> for a good discussion.
+<a href="https://unintelligible.org/onlisp/onlisp.html#SEC77">chapter 9 of "On Lisp"</a> for a good discussion.
 </p>
 
 </section>
@@ -537,7 +537,7 @@ accessible to the standard programmer as any other library.
 <h3 id="org649e882">A digression</h3>
 
 <div id="orge8105e2" class="figure">
-<p><a href="Lisp-Smalltalk-Haskell.jpg"><img src="Lisp-Smalltalk-Haskell.jpg" alt="Lisp-Smalltalk-Haskell.jpg" /></a> 
+<p><a href="Lisp-Smalltalk-Haskell.jpg"><img src="Lisp-Smalltalk-Haskell.jpg" alt="Lisp-Smalltalk-Haskell.jpg" /></a>
 </p>
 <p><span class="figure-number">Figure 3: </span>Lisp, Haskell and Smalltalk</p>
 </div>
@@ -586,7 +586,7 @@ What will we see at the intersection of these three?
 <h3 id="orgbe31e1b">Early AI programs</h3>
 <p>
 Lisp used to have a reputation as an "AI language" (whatever that means).
-It's not hard to understand when you look at <a href="http://norvig.com/paip.html">PAIP</a> and its <a href="http://norvig.com/paip/README.html">implementations</a> of
+It's not hard to understand when you look at <a href="https://norvig.com/paip.html">PAIP</a> and its <a href="https://norvig.com/paip/README.html">implementations</a> of
 early AI programs:
 </p>
 
@@ -626,15 +626,15 @@ multimethods:
 <div class="org-src-container">
 
 <pre  class="src src-lisp"><span style="color: #8D8D84;">; </span><span style="color: #8D8D84; font-style: italic;">declare the common argument structure prototype</span>
-<span style="color: #707183;">(</span><span style="color: #00793d;">defgeneric</span> <span style="color: #ca009b;">f</span> <span style="color: #7388D6;">(</span><span style="color: #c70000;">x</span> <span style="color: #007cb6;">y</span><span style="color: #7388D6;">)</span><span style="color: #707183;">)</span> 
+<span style="color: #707183;">(</span><span style="color: #00793d;">defgeneric</span> <span style="color: #ca009b;">f</span> <span style="color: #7388D6;">(</span><span style="color: #c70000;">x</span> <span style="color: #007cb6;">y</span><span style="color: #7388D6;">)</span><span style="color: #707183;">)</span>
 
 <span style="color: #8D8D84;">; </span><span style="color: #8D8D84; font-style: italic;">define an implementation for (f integer t), where t matches all types</span>
-<span style="color: #707183;">(</span><span style="color: #007a70;">defmethod</span> <span style="color: #ca009b;">f</span> <span style="color: #7388D6;">(</span><span style="color: #909183;">(</span><span style="color: #c70000;">x</span> <span style="color: #b82100;">integer</span><span style="color: #909183;">)</span> <span style="color: #007cb6;">y</span><span style="color: #7388D6;">)</span> <span style="color: #D0372D;">1</span><span style="color: #707183;">)</span> 
+<span style="color: #707183;">(</span><span style="color: #007a70;">defmethod</span> <span style="color: #ca009b;">f</span> <span style="color: #7388D6;">(</span><span style="color: #909183;">(</span><span style="color: #c70000;">x</span> <span style="color: #b82100;">integer</span><span style="color: #909183;">)</span> <span style="color: #007cb6;">y</span><span style="color: #7388D6;">)</span> <span style="color: #D0372D;">1</span><span style="color: #707183;">)</span>
 
 <span style="color: #707183;">(</span><span style="color: #ca009b;">f</span> <span style="color: #D0372D;">1</span> <span style="color: #D0372D;">2.0</span><span style="color: #707183;">)</span> <span style="color: #8D8D84; font-style: italic;">; =&gt; 1</span>
 
 <span style="color: #8D8D84;">; </span><span style="color: #8D8D84; font-style: italic;">define an implementation for (f integer real)</span>
-<span style="color: #707183;">(</span><span style="color: #007a70;">defmethod</span> <span style="color: #ca009b;">f</span> <span style="color: #7388D6;">(</span><span style="color: #909183;">(</span><span style="color: #c70000;">x</span> <span style="color: #b82100;">integer</span><span style="color: #909183;">)</span> <span style="color: #909183;">(</span><span style="color: #007cb6;">y</span> <span style="color: #0074ff;">real</span><span style="color: #909183;">)</span><span style="color: #7388D6;">)</span> <span style="color: #D0372D;">2</span><span style="color: #707183;">)</span> 
+<span style="color: #707183;">(</span><span style="color: #007a70;">defmethod</span> <span style="color: #ca009b;">f</span> <span style="color: #7388D6;">(</span><span style="color: #909183;">(</span><span style="color: #c70000;">x</span> <span style="color: #b82100;">integer</span><span style="color: #909183;">)</span> <span style="color: #909183;">(</span><span style="color: #007cb6;">y</span> <span style="color: #0074ff;">real</span><span style="color: #909183;">)</span><span style="color: #7388D6;">)</span> <span style="color: #D0372D;">2</span><span style="color: #707183;">)</span>
 
 <span style="color: #707183;">(</span><span style="color: #ca009b;">f</span> <span style="color: #D0372D;">1</span> <span style="color: #D0372D;">2.0</span><span style="color: #707183;">)</span> <span style="color: #8D8D84; font-style: italic;">; =&gt; 2 ; dispatch changed at runtime</span>
 </pre>
@@ -681,7 +681,7 @@ object."  At that moment, Anton became enlightened.
 <section >
 <p>
 If you want a real-life explanation of such techniques, look no further than
-<a href="http://letoverlambda.com/">Let over lambda</a>, named after a simple explanation of this technique. The
+<a href="https://letoverlambda.com/">Let over lambda</a>, named after a simple explanation of this technique. The
 book has most chapters freely available online, but the dead tree version is
 worth it if only for its discussion on performance tweaks for Lisp macros.
 </p>
@@ -692,7 +692,7 @@ worth it if only for its discussion on performance tweaks for Lisp macros.
 <section id="slide-orgc32e972">
 <h3 id="orgc32e972">FPGA code generation</h3>
 <p>
-There is a <a href="http://lisp-univ-etc.blogspot.com.br/2013/06/lisp-hackers-marc-battyani.html">blog</a>, later turned <a href="https://leanpub.com/lisphackers/read">book</a>, that features interviews with proeminent
+There is a <a href="https://lisp-univ-etc.blogspot.com.br/2013/06/lisp-hackers-marc-battyani.html">blog</a>, later turned <a href="https://leanpub.com/lisphackers/read">book</a>, that features interviews with proeminent
 Lisp hackers. One of them is <a href="https://www.linkedin.com/in/marcbattyani/">Marc Battyani</a>, who founded 2 companies that
 write compilers from Lisp to VHDL, to power FPGA devices that are used in
 business applications such as financial algorithms, signal processing
@@ -758,7 +758,7 @@ In this <a href="https://circleci.com/blog/rewriting-your-test-suite-in-clojure-
 "rewrite" their 5k LoC test suite from one test library to another. The
 interesting fact is that, instead of rewriting the source files to conform to
 the new API, the dev used macros to translate the old API to the new one
-automatically.  
+automatically.
 </p>
 
 <p>
@@ -810,7 +810,7 @@ solution working in 24h, though. Not too shabby for a 5k LoC test suite.
 C (and its sucessor C++) is (in)famous for its text-level macros, that work
 by basic string replacement inside source code. While useful for simpler
 purposes, their usage gets confusing and "dangerous" very quickly. For
-example, using this well-known <a href="http://lists.warhead.org.uk/pipermail/iwe/2005-July/000130.html">example by Mark Jason Dominus</a>:
+example, using this well-known <a href="https://lists.warhead.org.uk/pipermail/iwe/2005-July/000130.html">example by Mark Jason Dominus</a>:
 </p>
 
 <div class="org-src-container">
@@ -856,7 +856,7 @@ bytecode, it's now possible to write something similar to s-exps through
 </section>
 <section >
 <p class="fragment roll-in">
-From this interesting infosec <a href="http://twistedoakstudios.com/blog/Post2540_optimizing-just-in-time-with-expression-trees" class="fragment roll-in">example from a C# consultancy</a>:
+From this interesting infosec <a href="https://twistedoakstudios.com/blog/Post2540_optimizing-just-in-time-with-expression-trees" class="fragment roll-in">example from a C# consultancy</a>:
 </p>
 
 <blockquote  class="fragment roll-in">
@@ -886,30 +886,30 @@ follows:
     Steps = new[] {
         // A += input
         new DynamicHasher.Step {
-            LeftInputIndex = 1, 
-            RightInputIndex = 0, 
-            Operation = DynamicHasher.Operation.Xor, 
+            LeftInputIndex = 1,
+            RightInputIndex = 0,
+            Operation = DynamicHasher.Operation.Xor,
             OutputIndex = 1
         },
         // B -= C
         new DynamicHasher.Step {
-            LeftInputIndex = 2, 
-            RightInputIndex = 3, 
-            Operation = DynamicHasher.Operation.Subtract, 
+            LeftInputIndex = 2,
+            RightInputIndex = 3,
+            Operation = DynamicHasher.Operation.Subtract,
             OutputIndex = 2
         },
         // C ^= A
         new DynamicHasher.Step {
-            LeftInputIndex = 3, 
-            RightInputIndex = 1, 
-            Operation = DynamicHasher.Operation.Xor, 
+            LeftInputIndex = 3,
+            RightInputIndex = 1,
+            Operation = DynamicHasher.Operation.Xor,
             OutputIndex = 3
         },
         // A += B
         new DynamicHasher.Step {
-            LeftInputIndex = 1, 
-            RightInputIndex = 2, 
-            Operation = DynamicHasher.Operation.Add, 
+            LeftInputIndex = 1,
+            RightInputIndex = 2,
+            Operation = DynamicHasher.Operation.Add,
             OutputIndex = 1
         }
     }
@@ -957,7 +957,7 @@ Not bad for such a small piece of code, right?
 Elixir is a "sister" language to Ruby (features similar syntax, but <b>very</b>
 different semantics) that compiles down to Erlang bytecode (for the BEAM VM).
 The original Erlang implementation offers "support" for that in the form of
-the <a href="http://erlang.org/doc/man/erl_id_trans.html">parse_transform</a> function, but Elixir turns it up a few notches by
+the <a href="https://erlang.org/doc/man/erl_id_trans.html">parse_transform</a> function, but Elixir turns it up a few notches by
 offering a backquote-inspired syntax for macros.
 </p>
 
@@ -1019,13 +1019,13 @@ matter?
 <h2 id="orgbb12937">Questions?</h2>
 
 <div class="figure">
-<p><a href="john-mccarthy-programming-completely-wrong.jpg"><img src="./john-mccarthy-programming-completely-wrong.jpg" alt="john-mccarthy-programming-completely-wrong.jpg" /></a> 
+<p><a href="john-mccarthy-programming-completely-wrong.jpg"><img src="./john-mccarthy-programming-completely-wrong.jpg" alt="john-mccarthy-programming-completely-wrong.jpg" /></a>
 </p>
 </div>
 </div>
 </div>
-<script src="http://cdn.jsdelivr.net/reveal.js/3.0.0/lib/js/head.min.js"></script>
-<script src="http://cdn.jsdelivr.net/reveal.js/3.0.0/js/reveal.js"></script>
+<script src="https://cdn.jsdelivr.net/reveal.js/3.0.0/lib/js/head.min.js"></script>
+<script src="https://cdn.jsdelivr.net/reveal.js/3.0.0/js/reveal.js"></script>
 
 <script>
 // Full list of configuration options available here:
@@ -1057,11 +1057,11 @@ multiplex: {
 
 // Optional libraries used to extend on reveal.js
 dependencies: [
- { src: 'http://cdn.jsdelivr.net/reveal.js/3.0.0/lib/js/classList.js', condition: function() { return !document.body.classList; } },
- { src: 'http://cdn.jsdelivr.net/reveal.js/3.0.0/plugin/markdown/marked.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
- { src: 'http://cdn.jsdelivr.net/reveal.js/3.0.0/plugin/markdown/markdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
- { src: 'http://cdn.jsdelivr.net/reveal.js/3.0.0/plugin/zoom-js/zoom.js', async: true, condition: function() { return !!document.body.classList; } },
- { src: 'http://cdn.jsdelivr.net/reveal.js/3.0.0/plugin/notes/notes.js', async: true, condition: function() { return !!document.body.classList; } }]
+ { src: 'https://cdn.jsdelivr.net/reveal.js/3.0.0/lib/js/classList.js', condition: function() { return !document.body.classList; } },
+ { src: 'https://cdn.jsdelivr.net/reveal.js/3.0.0/plugin/markdown/marked.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+ { src: 'https://cdn.jsdelivr.net/reveal.js/3.0.0/plugin/markdown/markdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+ { src: 'https://cdn.jsdelivr.net/reveal.js/3.0.0/plugin/zoom-js/zoom.js', async: true, condition: function() { return !!document.body.classList; } },
+ { src: 'https://cdn.jsdelivr.net/reveal.js/3.0.0/plugin/notes/notes.js', async: true, condition: function() { return !!document.body.classList; } }]
 });
 </script>
 </body>
