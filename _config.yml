@@ -9,8 +9,8 @@ relative_permalinks: false
 title:            Daniel Luna
 tagline:          'Software engineer'
 description:      'Specialization is for insects. - Robert Heinlein'
-url:              http://dcluna.github.io
-baseurl:          "http://dcluna.github.io/"
+url:              https://dcluna.github.io
+baseurl:          "https://dcluna.github.io/"
 author_gravatar:    39ffc379f09488e2378c587c6705978c # Gravatar md5 hash
 
 author:
