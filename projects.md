@@ -43,4 +43,5 @@ I've made contributions of varying complexity to the following open source proje
 - [emacs-rufo](https://github.com/aleandros/emacs-rufo)
 - [rufo.el](https://github.com/danielma/rufo.el)
 - [remacs](https://github.com/Wilfred/remacs)
+- [rubocop](https://github.com/rubocop-hq/rubocop)
 - [pmd.el](https://github.com/dcluna/pmd.el) (creator)
