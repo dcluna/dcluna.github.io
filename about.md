@@ -12,7 +12,7 @@ Interested in security and [OSCP](https://www.offensive-security.com/information
 Contact
 =======
 
-* Resume: [Dropbox](https://www.dropbox.com/s/jjeb1lwjyxzgihu/daniel-luna-resume.pdf?dl=0)
+* Resume: [Dropbox]({{ resume.url }})
 * Keybase: [dcluna](https://keybase.io/dcluna)
 * Email: dancluna at google mail
 * Github: [dcluna](http://www.github.com/dcluna)
